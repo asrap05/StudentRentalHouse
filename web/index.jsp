@@ -388,7 +388,7 @@
             </div>
             <div class="page-body">
                 <div class="section-divider"><h3>Register / Edit Tenant</h3><div class="section-divider-line"></div></div>
-                <div class="card" style="margin-bottom:24px;">
+                <div class="card" id="tenant-form-card" style="margin-bottom:24px;">
                     <div class="card-header">
                         <div class="card-title"><div class="card-title-dot"></div>Tenant Form <span class="anno">TenantServlet &rarr; doPost()</span></div>
                         <span class="badge badge-green">Add New</span>
@@ -478,7 +478,7 @@
 
                 <!-- Form -->
                 <div class="section-divider"><h3>Submit / Edit Complaint</h3><div class="section-divider-line"></div></div>
-                <div class="card" style="margin-bottom:24px;">
+                <div class="card" id="complaint-form-card" style="margin-bottom:24px;">
                     <div class="card-header">
                         <div class="card-title"><div class="card-title-dot"></div>Complaint Form <span class="anno">ComplaintServlet &rarr; doPost()</span></div>
                         <span class="badge badge-green">Add New</span>
