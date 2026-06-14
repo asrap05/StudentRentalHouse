@@ -494,6 +494,31 @@ document.addEventListener('click', function(e) {
         });
         showToast('Form cleared', 'info');
     }
+
+    // ─── Save Student ───
+    if (text === 'Save Student') {
+        e.preventDefault();
+        var nm = document.getElementById('student-name'), mt = document.getElementById('student-matric'),
+            ph = document.getElementById('student-phone'), em = document.getElementById('student-email'),
+            cs = document.getElementById('student-course'), gd = document.getElementById('student-gender'),
+            hs = document.getElementById('student-house');
+        if (!nm || !mt || !nm.value.trim() || !mt.value.trim()) { showToast('Please fill Name and Matric No.', 'error'); return; }
+        var table = document.querySelector('#page-student table tbody'); if (!table) return;
+        var count = table.querySelectorAll('tr').length + 1, id = 'S-' + String(count).padStart(3, '0');
+        var houseVal = hs ? hs.value : '';
+        var row = table.insertRow();
+        row.innerHTML = '<td style="color:var(--gray-400);font-size:12px;">' + count + '</td>' +
+            '<td><span class="id-label">' + id + '</span></td>' +
+            '<td style="font-size:11px;color:var(--gray-400);">' + mt.value.trim() + '</td>' +
+            '<td style="font-weight:600;color:var(--gray-800);">' + nm.value.trim() + '</td>' +
+            '<td>' + (ph ? ph.value.trim() || '-' : '-') + '</td>' +
+            '<td>' + (cs ? cs.value.trim() || '-' : '-') + '</td>' +
+            '<td><span class="badge badge-purple">' + (houseVal.split('|')[0] || houseVal || '-') + '</span></td>' +
+            '<td><div class="actions-cell"><button class="topbar-btn btn-warning btn-sm">Edit</button><button class="topbar-btn btn-danger btn-sm">Delete</button></div></td>';
+        updateFooter(table); updateDashboardStats();
+        showToast(id + ' saved!', 'success');
+        nm.value = ''; mt.value = ''; if (ph) ph.value = ''; if (cs) cs.value = '';
+    }
 });
 
 // ═══ TOPBAR BUTTONS ═══

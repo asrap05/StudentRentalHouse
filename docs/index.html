@@ -200,6 +200,7 @@
             <div class="sidebar-section-label">Modules</div>
             <div class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9.5L12 3l9 6.5V21H3V9.5z"/></svg>House Management</div>
             <div class="sidebar-link" onclick="switchPageByName('tenant')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a7 7 0 0113 0"/></svg>Tenant Management</div>
+            <div class="sidebar-link" onclick="switchPageByName('student')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>Student</div>
             <div class="sidebar-link" onclick="switchPageByName('complaint')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Complaint Management</div>
             <div class="sidebar-section-label">System</div>
             <div class="sidebar-link" onclick="switchPageByName('settings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>Settings</div>
@@ -282,6 +283,56 @@
 </div>
 
 
+<!-- ═══ PAGE 5 — STUDENT MANAGEMENT ═══ -->
+<div id="page-student" class="page">
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-logo"><div class="sidebar-logo-mark"><svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V21H3V9.5z"/></svg></div><div class="sidebar-logo-title">Rental House<br/>Management</div><div class="sidebar-logo-sub">University Project v1.0</div></div>
+            <div class="sidebar-section-label">Main Menu</div>
+            <div class="sidebar-link" onclick="switchPageByName('dashboard')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</div>
+            <div class="sidebar-section-label">Modules</div>
+            <div class="sidebar-link" onclick="switchPageByName('house')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9.5L12 3l9 6.5V21H3V9.5z"/></svg>House Management</div>
+            <div class="sidebar-link" onclick="switchPageByName('tenant')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a7 7 0 0113 0"/></svg>Tenant Management</div>
+            <div class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>Student</div>
+            <div class="sidebar-link" onclick="switchPageByName('complaint')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Complaint Management</div>
+            <div class="sidebar-section-label">System</div>
+            <div class="sidebar-link" onclick="switchPageByName('settings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>Settings</div>
+            <div class="sidebar-link" onclick="switchPageByName('login')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Logout</div>
+            <div class="sidebar-bottom"><div class="sidebar-user"><div class="sidebar-avatar">AD</div><div><div class="sidebar-user-name" id="sidebar-username">Admin User</div><div class="sidebar-user-role" id="sidebar-role">Administrator</div></div></div></div>
+        </aside>
+        <div class="main-content">
+            <div class="topbar"><div class="topbar-left"><h2>Student Management</h2><p>Register and manage student profiles</p></div><div class="topbar-right"><button class="topbar-btn btn-green">+ Register Student</button></div></div>
+            <div class="page-body">
+                <div class="section-divider"><h3>Register / Edit Student</h3><div class="section-divider-line"></div></div>
+                <div class="card" id="student-form-card" style="margin-bottom:24px;">
+                    <div class="card-header"><div class="card-title"><div class="card-title-dot"></div>Student Form</div><span class="badge badge-green">Add New</span></div>
+                    <div class="card-body"><div class="form-grid">
+                        <div class="form-group"><label class="form-label">Student ID</label><input class="form-input" type="text" placeholder="Auto-generated (e.g. S-001)" disabled style="background:var(--gray-50);color:var(--gray-400);"/></div>
+                        <div class="form-group"><label class="form-label">Matric No. <span class="req">*</span></label><input id="student-matric" class="form-input" type="text" placeholder="e.g. A21EC0001"/></div>
+                        <div class="form-group"><label class="form-label">Full Name <span class="req">*</span></label><input id="student-name" class="form-input" type="text" placeholder="e.g. Muhammad Ali bin Hassan"/></div>
+                        <div class="form-group"><label class="form-label">Phone Number</label><input id="student-phone" class="form-input" type="tel" placeholder="e.g. 012-345 6789"/></div>
+                        <div class="form-group"><label class="form-label">Email</label><input id="student-email" class="form-input" type="email" placeholder="e.g. student@umt.edu.my"/></div>
+                        <div class="form-group"><label class="form-label">Course / Program</label><input id="student-course" class="form-input" type="text" placeholder="e.g. Bachelor of Computer Science"/></div>
+                        <div class="form-group"><label class="form-label">Gender</label><select id="student-gender" class="form-select"><option>-- Select Gender --</option><option>Male</option><option>Female</option></select></div>
+                        <div class="form-group"><label class="form-label">Assigned House</label><select id="student-house" class="form-select"><option value="">-- Select House --</option><option>H-001 | Jalan Universiti 12 | RM 800</option><option>H-005 | Sri Mawar Apt, Nilai | RM 750</option></select></div>
+                    </div>
+                    <div class="form-actions" style="margin-top:16px;"><button class="topbar-btn btn-green"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline;vertical-align:middle;margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg>Save Student</button><button class="topbar-btn btn-outline">Clear Form</button></div></div>
+                </div>
+                <div class="section-divider"><h3>All Students</h3><div class="section-divider-line"></div></div>
+                <div class="card">
+                    <div class="card-header"><div class="card-title"><div class="card-title-dot"></div>Student Records</div><div class="filter-bar"><div class="search-bar-wrap"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input class="search-input" type="text" placeholder="Search name, matric, or course..."/></div></div></div>
+                    <div class="table-wrap"><table><thead><tr><th>#</th><th>Student ID</th><th>Matric No.</th><th>Full Name</th><th>Phone</th><th>Course</th><th>House</th><th>Actions</th></tr></thead><tbody>
+                        <tr><td style="color:var(--gray-400);font-size:12px;">1</td><td><span class="id-label">S-001</span></td><td style="font-size:11px;color:var(--gray-400);">A21EC0011</td><td style="font-weight:600;color:var(--gray-800);">Ahmad Zaki Ibrahim</td><td>012-345 6789</td><td>B. Comp. Science</td><td><span class="badge badge-purple">H-002</span></td><td><div class="actions-cell"><button class="topbar-btn btn-warning btn-sm">Edit</button><button class="topbar-btn btn-danger btn-sm">Delete</button></div></td></tr>
+                        <tr><td style="color:var(--gray-400);font-size:12px;">2</td><td><span class="id-label">S-002</span></td><td style="font-size:11px;color:var(--gray-400);">A21EC0025</td><td style="font-weight:600;color:var(--gray-800);">Nurul Aina Mohd Noor</td><td>011-234 5678</td><td>B. Information Tech</td><td><span class="badge badge-purple">H-004</span></td><td><div class="actions-cell"><button class="topbar-btn btn-warning btn-sm">Edit</button><button class="topbar-btn btn-danger btn-sm">Delete</button></div></td></tr>
+                    </tbody></table></div>
+                    <div class="table-footer"><div class="table-info">Showing 1 - 2 of 2 records</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <!-- ═══ PAGE 5 — COMPLAINT MANAGEMENT ═══ -->
 <div id="page-complaint" class="page">
     <div class="app-layout">
@@ -344,6 +395,7 @@
             <div class="sidebar-section-label">Modules</div>
             <div class="sidebar-link" onclick="switchPageByName('house')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9.5L12 3l9 6.5V21H3V9.5z"/></svg>House Management</div>
             <div class="sidebar-link" onclick="switchPageByName('tenant')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a7 7 0 0113 0"/></svg>Tenant Management</div>
+            <div class="sidebar-link" onclick="switchPageByName('student')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>Student</div>
             <div class="sidebar-link" onclick="switchPageByName('complaint')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Complaint Management</div>
             <div class="sidebar-section-label">System</div>
             <div class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>Settings</div>
