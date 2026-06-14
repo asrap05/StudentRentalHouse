@@ -3,6 +3,38 @@
  * Client-side interactivity: navigation, filtering, pagination, toasts
  */
 
+// ═══ LOGIN VALIDATION ═══
+
+function doLogin() {
+    var usernameInput = document.querySelector('#page-login input[type="text"]');
+    var passwordInput = document.querySelector('#page-login input[type="password"]');
+    var errorDiv = document.getElementById('login-error');
+
+    var username = usernameInput ? usernameInput.value.trim() : '';
+    var password = passwordInput ? passwordInput.value : '';
+
+    if (username === 'admin' && password === 'admin123') {
+        if (errorDiv) errorDiv.style.display = 'none';
+        switchPageByName('dashboard');
+        showToast('Welcome back, Admin!', 'success');
+        return;
+    }
+    if (username === 'staff' && password === 'staff123') {
+        if (errorDiv) errorDiv.style.display = 'none';
+        switchPageByName('dashboard');
+        showToast('Welcome back, Staff!', 'success');
+        return;
+    }
+
+    if (errorDiv) {
+        errorDiv.textContent = '✗ Invalid username or password.';
+        errorDiv.style.display = 'block';
+    }
+    // Shake animation on inputs
+    if (usernameInput) { usernameInput.style.borderColor = '#dc2626'; setTimeout(function() { usernameInput.style.borderColor = ''; }, 1500); }
+    if (passwordInput) { passwordInput.style.borderColor = '#dc2626'; setTimeout(function() { passwordInput.style.borderColor = ''; }, 1500); }
+}
+
 // ═══ PAGE NAVIGATION ═══
 
 function switchPage(name, tabEl) {

@@ -59,7 +59,9 @@
                     <a class="login-forgot" href="#">Forgot password?</a>
                 </div>
 
-                <button class="login-btn" onclick="switchPageByName('dashboard')">Sign In to Dashboard</button>
+                <div id="login-error" style="color:#dc2626;font-size:13px;font-weight:600;margin-bottom:12px;display:none;text-align:center;"></div>
+
+                <button class="login-btn" onclick="doLogin()">Sign In to Dashboard</button>
 
                 <div class="login-divider">
                     <div class="login-divider-line"></div><span>System Info</span><div class="login-divider-line"></div>
