@@ -23,9 +23,11 @@ function doLogin() {
     var account = userStore[user];
     if (account && pass === account.password) {
         userStore.currentUser = user;
+        userStore.currentRole = account.role;
         if (err) err.style.display = 'none';
         updateSidebar(account.name, account.role, account.avatar);
-        switchPageByName('dashboard');
+        var dest = account.role === 'Student' ? 'student-dashboard' : 'dashboard';
+        switchPageByName(dest);
         showToast('Welcome back, ' + account.name.split(' ')[0] + '!', 'success');
         return;
     }
@@ -616,5 +618,29 @@ function viewComplaint(btn) {
 
 function closeModal() {
     document.getElementById('view-modal').style.display = 'none';
+}
+
+// ═══ STUDENT: Submit Complaint ═══
+
+function submitStudentComplaint() {
+    var desc = document.getElementById('stud-comp-desc');
+    if (!desc || !desc.value.trim()) { showToast('Please enter a complaint description', 'error'); return; }
+    var table = document.querySelector('#page-complaint table tbody'); if (!table) return;
+    var count = table.querySelectorAll('tr').length + 1, id = 'C-' + String(count).padStart(3, '0');
+    var today = new Date().toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'});
+    var row = table.insertRow();
+    row.innerHTML = '<td style="color:var(--gray-400);font-size:12px;">' + count + '</td>' +
+        '<td><span class="id-label">' + id + '</span></td>' +
+        '<td style="max-width:200px;"><div style="font-weight:500;color:var(--gray-800);">' + desc.value.trim() + '</div><div style="font-size:11px;color:var(--gray-400);">New submission</div></td>' +
+        '<td><div style="font-weight:600;font-size:12px;color:var(--purple-700);">Student</div></td>' +
+        '<td style="font-size:12px;color:var(--gray-500);">' + today + '</td>' +
+        '<td><span class="badge badge-red">Pending</span></td>' +
+        '<td><div class="actions-cell"><button class="topbar-btn btn-green btn-sm">Resolve</button><button class="topbar-btn btn-warning btn-sm">Edit</button><button class="topbar-btn btn-danger btn-sm">Delete</button></div></td>';
+    updateFooter(table); updateDashboardStats();
+    // Update student complaint count
+    var cnt = document.getElementById('stud-comp-count');
+    if (cnt) cnt.textContent = count;
+    showToast(id + ' submitted!', 'success');
+    desc.value = '';
 }
 
