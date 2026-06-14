@@ -81,6 +81,21 @@ function updateDashboardStats() {
     st('occ-rate', totalHouses > 0 ? Math.round(occupied/totalHouses*100) + '%' : '0%');
     st('occ-revenue', 'RM ' + occupiedRent.toLocaleString());
     st('occ-avg', occupied > 0 ? 'RM ' + Math.round(occupiedRent/occupied).toLocaleString() : 'RM 0');
+
+    // Complaint summary counters
+    var pending = 0, progress = 0, resolved = 0;
+    complaintRows.forEach(function(r) {
+        var b = r.querySelector('.badge'); if (!b) return;
+        var s = b.textContent.trim();
+        if (s === 'Pending') pending++;
+        else if (s === 'In Progress') progress++;
+        else if (s === 'Resolved') resolved++;
+    });
+    st('comp-count-pending', pending);
+    st('comp-count-progress', progress);
+    st('comp-count-resolved', resolved);
+    var badge = document.getElementById('comp-pending-badge');
+    if (badge) badge.textContent = pending + ' Pending';
 }
 
 // ═══ PAGE NAVIGATION ═══
@@ -297,6 +312,7 @@ document.addEventListener('click', function(e) {
     } else if (text === 'Resolve') {
         var r3 = btn.closest('tr'), badge = r3 ? r3.querySelector('.badge') : null;
         if (badge) { badge.textContent = 'Resolved'; badge.className = 'badge badge-green'; }
+        updateDashboardStats();
         showToast('Resolved', 'success');
     } else if (text === 'View') { showToast('View details — coming soon', 'info'); }
 });
