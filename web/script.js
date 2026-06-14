@@ -8,6 +8,7 @@
 var userStore = {
     admin: { password: localStorage.getItem('pwd_admin') || 'admin123', name: 'Admin User', role: 'Administrator', avatar: 'AD' },
     staff: { password: localStorage.getItem('pwd_staff') || 'staff123', name: 'Staff User', role: 'Staff', avatar: 'ST' },
+    student: { password: localStorage.getItem('pwd_student') || 'student123', name: 'Student User', role: 'Student', avatar: 'ST' },
     currentUser: null
 };
 
