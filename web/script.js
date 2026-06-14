@@ -1,37 +1,96 @@
 /**
  * Student Rental House Management System
- * Client-side interactivity: navigation, filtering, pagination, toasts
+ * Client-side interactivity: navigation, filtering, pagination, toasts, form saving
  */
 
 // ═══ LOGIN VALIDATION ═══
 
 function doLogin() {
-    var usernameInput = document.getElementById('login-username');
-    var passwordInput = document.getElementById('login-password');
-    var errorDiv = document.getElementById('login-error');
+    var u = document.getElementById('login-username');
+    var p = document.getElementById('login-password');
+    var err = document.getElementById('login-error');
+    var user = u ? u.value.trim() : '', pass = p ? p.value : '';
 
-    var username = usernameInput ? usernameInput.value.trim() : '';
-    var password = passwordInput ? passwordInput.value : '';
-
-    if (username === 'admin' && password === 'admin123') {
-        if (errorDiv) errorDiv.style.display = 'none';
+    if (user === 'admin' && pass === 'admin123') {
+        if (err) err.style.display = 'none';
+        updateSidebar('Admin User', 'Administrator', 'AD');
         switchPageByName('dashboard');
-        showToast('Welcome back, Admin!', 'success');
-        return;
+        showToast('Welcome back, Admin!', 'success'); return;
     }
-    if (username === 'staff' && password === 'staff123') {
-        if (errorDiv) errorDiv.style.display = 'none';
+    if (user === 'staff' && pass === 'staff123') {
+        if (err) err.style.display = 'none';
+        updateSidebar('Staff User', 'Staff', 'ST');
         switchPageByName('dashboard');
-        showToast('Welcome back, Staff!', 'success');
-        return;
+        showToast('Welcome back, Staff!', 'success'); return;
+    }
+    if (err) { err.textContent = '✗ Invalid username or password.'; err.style.display = 'block'; }
+    if (u) { u.style.borderColor = '#dc2626'; setTimeout(function(){u.style.borderColor='';},1500); }
+    if (p) { p.style.borderColor = '#dc2626'; setTimeout(function(){p.style.borderColor='';},1500); }
+}
+
+function updateSidebar(name, role, avatar) {
+    var names = document.querySelectorAll('#sidebar-username');
+    var roles = document.querySelectorAll('#sidebar-role');
+    names.forEach(function(el) { el.textContent = name; });
+    roles.forEach(function(el) { el.textContent = role; });
+}
+
+// ═══ DASHBOARD STATS ═══
+
+function updateDashboardStats() {
+    // Count houses
+    var houseRows = document.querySelectorAll('#page-house table tbody tr');
+    var totalHouses = houseRows.length;
+    var occupied = 0, vacant = 0, maint = 0, totalRent = 0, occupiedRent = 0;
+    houseRows.forEach(function(r) {
+        var badge = r.querySelector('.badge');
+        var priceCell = r.querySelectorAll('td')[3];
+        var price = priceCell ? parseFloat(priceCell.textContent.replace('RM','').trim()) : 0;
+        totalRent += price;
+        if (badge) {
+            var st = badge.textContent.trim();
+            if (st === 'Occupied') { occupied++; occupiedRent += price; }
+            else if (st === 'Available') vacant++;
+            else if (st === 'Maintenance' || st === 'Under Maintenance') maint++;
+        }
+    });
+
+    // Count tenants
+    var tenantCount = document.querySelectorAll('#page-tenant table tbody tr').length;
+
+    // Count open complaints (Pending + In Progress)
+    var complaintRows = document.querySelectorAll('#page-complaint table tbody tr');
+    var openComplaints = 0;
+    complaintRows.forEach(function(r) {
+        var badge = r.querySelector('.badge');
+        if (badge && (badge.textContent.trim() === 'Pending' || badge.textContent.trim() === 'In Progress')) openComplaints++;
+    });
+
+    // Update stat cards
+    var stats = document.querySelectorAll('#page-dashboard .stat-value');
+    if (stats[0]) stats[0].textContent = totalHouses;
+    if (stats[1]) stats[1].textContent = tenantCount;
+    if (stats[2]) stats[2].textContent = openComplaints;
+    if (stats[3]) stats[3].textContent = vacant;
+
+    // Update occupancy overview
+    var occBar = document.querySelector('#page-dashboard .card-body [style*="flex-direction:column"]');
+    if (occBar && totalHouses > 0) {
+        var rows2 = occBar.querySelectorAll('[style*="display:flex;justify-content:space-between"]');
+        if (rows2[0]) rows2[0].querySelectorAll('span')[1].textContent = occupied + ' / ' + totalHouses;
+        if (rows2[1]) rows2[1].querySelectorAll('span')[1].textContent = vacant + ' / ' + totalHouses;
+        if (rows2[2]) rows2[2].querySelectorAll('span')[1].textContent = maint + ' / ' + totalHouses;
+        var bars = occBar.querySelectorAll('[style*="border-radius:20px"][style*="height:10px"] [style*="width:"]');
+        if (bars[0]) bars[0].style.width = (occupied/totalHouses*100) + '%';
+        if (bars[1]) bars[1].style.width = (vacant/totalHouses*100) + '%';
+        if (bars[2]) bars[2].style.width = (maint/totalHouses*100) + '%';
     }
 
-    if (errorDiv) {
-        errorDiv.textContent = '✗ Invalid username or password.';
-        errorDiv.style.display = 'block';
-    }
-    if (usernameInput) { usernameInput.style.borderColor = '#dc2626'; setTimeout(function() { usernameInput.style.borderColor = ''; }, 1500); }
-    if (passwordInput) { passwordInput.style.borderColor = '#dc2626'; setTimeout(function() { passwordInput.style.borderColor = ''; }, 1500); }
+    // Update occupancy rate / revenue
+    var occStats = document.querySelectorAll('#page-dashboard .card-body [style*="text-align:center"] [style*="font-family:\\\'Syne\\\'"]');
+    if (occStats[0]) occStats[0].textContent = totalHouses > 0 ? Math.round(occupied/totalHouses*100) + '%' : '0%';
+    if (occStats[1]) occStats[1].textContent = 'RM ' + occupiedRent.toLocaleString();
+    if (occStats[2]) occStats[2].textContent = occupied > 0 ? 'RM ' + Math.round(occupiedRent/occupied).toLocaleString() : 'RM 0';
 }
 
 // ═══ PAGE NAVIGATION ═══
@@ -45,18 +104,13 @@ function switchPage(name, tabEl) {
 }
 
 function switchPageByName(name) {
-    var pages = ['login', 'dashboard', 'house', 'tenant', 'complaint'];
-    var idx = pages.indexOf(name);
-    var tabs = document.querySelectorAll('.nav-tab');
     document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
-    tabs.forEach(function(t) { t.classList.remove('active'); });
     var page = document.getElementById('page-' + name);
     if (page) page.classList.add('active');
-    if (idx >= 0 && tabs[idx]) tabs[idx].classList.add('active');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ═══ TOAST NOTIFICATIONS ═══
+// ═══ TOAST ═══
 
 function showToast(msg, type) {
     type = type || 'info';
@@ -65,55 +119,35 @@ function showToast(msg, type) {
     toast.textContent = msg;
     document.body.appendChild(toast);
     requestAnimationFrame(function() { toast.classList.add('show'); });
-    setTimeout(function() {
-        toast.classList.remove('show');
-        setTimeout(function() { toast.remove(); }, 300);
-    }, 2500);
+    setTimeout(function() { toast.classList.remove('show'); setTimeout(function() { toast.remove(); }, 300); }, 2500);
 }
 
-// ═══ HELPER: get visible rows ═══
+// ═══ HELPERS ═══
 
 function getVisibleRows(table) {
-    var rows = table.querySelectorAll('tbody tr');
-    var visible = [];
-    for (var i = 0; i < rows.length; i++) {
-        if (rows[i].style.display !== 'none') visible.push(rows[i]);
-    }
+    var rows = table.querySelectorAll('tbody tr'), visible = [];
+    for (var i = 0; i < rows.length; i++) if (rows[i].style.display !== 'none') visible.push(rows[i]);
     return visible;
 }
-
 function updateFooter(table) {
-    var total = table.querySelectorAll('tbody tr').length;
-    var shown = getVisibleRows(table).length;
+    var total = table.querySelectorAll('tbody tr').length, shown = getVisibleRows(table).length;
     var footer = table.closest('.card').querySelector('.table-info');
     if (footer) footer.textContent = 'Showing 1 - ' + shown + ' of ' + total + ' records';
 }
 
-// ═══ FILTER BUTTONS ═══
+// ═══ FILTER ═══
 
 document.addEventListener('click', function(e) {
-    var btn = e.target.closest('.filter-btn');
-    if (!btn) return;
-    var bar = btn.closest('.filter-bar');
-    if (!bar) return;
-    bar.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+    var btn = e.target.closest('.filter-btn'); if (!btn) return;
+    var bar = btn.closest('.filter-bar'); if (!bar) return;
+    bar.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
     btn.classList.add('active');
-
-    var card = bar.closest('.card');
-    if (!card) return;
-    var table = card.querySelector('table');
-    if (!table) return;
-
+    var table = bar.closest('.card').querySelector('table'); if (!table) return;
     var filter = btn.textContent.trim();
-    var rows = table.querySelectorAll('tbody tr');
-    rows.forEach(function(row) {
+    table.querySelectorAll('tbody tr').forEach(function(row) {
         if (filter === 'All') { row.style.display = ''; return; }
         var badge = row.querySelector('.badge');
-        if (badge && badge.textContent.trim() === filter) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
+        row.style.display = (badge && badge.textContent.trim() === filter) ? '' : 'none';
     });
     updateFooter(table);
 });
@@ -121,17 +155,11 @@ document.addEventListener('click', function(e) {
 // ═══ SEARCH ═══
 
 document.addEventListener('input', function(e) {
-    var input = e.target.closest('.search-input');
-    if (!input) return;
-    var query = input.value.toLowerCase().trim();
-    var card = input.closest('.card');
-    if (!card) return;
-    var table = card.querySelector('table');
-    if (!table) return;
-    var rows = table.querySelectorAll('tbody tr');
-    rows.forEach(function(row) {
-        if (!query) { row.style.display = ''; return; }
-        row.style.display = row.textContent.toLowerCase().indexOf(query) >= 0 ? '' : 'none';
+    var input = e.target.closest('.search-input'); if (!input) return;
+    var table = input.closest('.card').querySelector('table'); if (!table) return;
+    var q = input.value.toLowerCase().trim();
+    table.querySelectorAll('tbody tr').forEach(function(row) {
+        row.style.display = (!q || row.textContent.toLowerCase().indexOf(q) >= 0) ? '' : 'none';
     });
     updateFooter(table);
 });
@@ -139,35 +167,17 @@ document.addEventListener('input', function(e) {
 // ═══ PAGINATION ═══
 
 document.addEventListener('click', function(e) {
-    var pg = e.target.closest('.pg-btn');
-    if (!pg || pg.classList.contains('active')) return;
-    var pagination = pg.closest('.pagination');
-    if (!pagination) return;
-    pagination.querySelectorAll('.pg-btn').forEach(function(b) { b.classList.remove('active'); });
+    var pg = e.target.closest('.pg-btn'); if (!pg || pg.classList.contains('active')) return;
+    var pag = pg.closest('.pagination'); if (!pag) return;
+    pag.querySelectorAll('.pg-btn').forEach(function(b){b.classList.remove('active');});
     pg.classList.add('active');
-
-    var card = pagination.closest('.card');
-    if (!card) return;
-    var table = card.querySelector('table');
-    if (!table) return;
-
-    var pageNum = parseInt(pg.textContent.trim()) || 1;
-    var perPage = 5;
+    var table = pag.closest('.card').querySelector('table'); if (!table) return;
+    var pageNum = parseInt(pg.textContent.trim()) || 1, perPage = 5;
     var visible = getVisibleRows(table);
-    // If none hidden, paginate all rows
-    if (visible.length === table.querySelectorAll('tbody tr').length) {
-        visible = Array.from(table.querySelectorAll('tbody tr'));
-    }
-    var start = (pageNum - 1) * perPage;
-    var end = start + perPage;
-
-    table.querySelectorAll('tbody tr').forEach(function(row, i) {
-        var realIdx = visible.indexOf(row);
-        if (realIdx >= start && realIdx < end) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
+    if (visible.length === table.querySelectorAll('tbody tr').length) visible = Array.from(table.querySelectorAll('tbody tr'));
+    var start = (pageNum-1)*perPage, end = start+perPage;
+    table.querySelectorAll('tbody tr').forEach(function(row,i) {
+        row.style.display = (i >= start && i < end) ? '' : 'none';
     });
     updateFooter(table);
 });
@@ -175,169 +185,123 @@ document.addEventListener('click', function(e) {
 // ═══ PASSWORD TOGGLE ═══
 
 document.addEventListener('click', function(e) {
-    var toggle = e.target.closest('.pw-toggle');
-    if (!toggle) return;
-    var pwInput = document.getElementById('login-password');
-    if (!pwInput) return;
-    if (pwInput.type === 'password') {
-        pwInput.type = 'text';
-        toggle.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#9333ea" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+    var tg = e.target.closest('.pw-toggle'); if (!tg) return;
+    var pw = document.getElementById('login-password'); if (!pw) return;
+    if (pw.type === 'password') {
+        pw.type = 'text';
+        tg.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#9333ea" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
     } else {
-        pwInput.type = 'password';
-        toggle.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>';
+        pw.type = 'password';
+        tg.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>';
     }
 });
 
-// ═══ TABLE ACTION BUTTONS ═══
+// ═══ TABLE ACTION BUTTONS (Edit/Delete/Resolve) ═══
 
 document.addEventListener('click', function(e) {
-    var btn = e.target.closest('button');
-    if (!btn) return;
-    if (btn.closest('.topbar') || btn.closest('.login-outer') ||
-        btn.closest('.nav-tabs-bar') || btn.closest('.sidebar') ||
-        btn.closest('.quick-links') || btn.closest('.form-actions') ||
-        btn.closest('.login-btn')) return;
-
+    var btn = e.target.closest('button'); if (!btn) return;
+    if (btn.closest('.topbar') || btn.closest('.login-outer') || btn.closest('.sidebar') ||
+        btn.closest('.quick-links') || btn.closest('.form-actions')) return;
     var text = btn.textContent.trim();
     if (text === 'Edit') {
-        var row = btn.closest('tr');
-        var id = row ? row.querySelector('.id-label') : null;
+        var id = btn.closest('tr').querySelector('.id-label');
         showToast(id ? id.textContent.trim() + ' — Edit mode' : 'Edit mode', 'warning');
     } else if (text === 'Delete') {
-        var row2 = btn.closest('tr');
-        var id2 = row2 ? row2.querySelector('.id-label') : null;
-        if (confirm(id2 ? 'Delete ' + id2.textContent.trim() + '?' : 'Delete record?')) {
-            if (row2) {
-                row2.style.transition = 'opacity 0.3s';
-                row2.style.opacity = '0';
-                setTimeout(function() {
-                    row2.style.display = 'none';
-                    var table = row2.closest('table');
-                    if (table) updateFooter(table);
-                }, 300);
+        var row = btn.closest('tr'), idEl = row ? row.querySelector('.id-label') : null;
+        if (confirm(idEl ? 'Delete ' + idEl.textContent.trim() + '?' : 'Delete record?')) {
+            if (row) {
+                row.style.opacity = '0'; row.style.transition = 'opacity 0.3s';
+                setTimeout(function() { row.remove(); updateFooter(row.closest('table')); updateDashboardStats(); }, 300);
             }
-            showToast(id2 ? id2.textContent.trim() + ' deleted' : 'Deleted', 'error');
+            showToast(idEl ? idEl.textContent.trim() + ' deleted' : 'Deleted', 'error');
         }
     } else if (text === 'Resolve') {
-        var row3 = btn.closest('tr');
-        if (row3) {
-            var badge = row3.querySelector('.badge');
-            if (badge) { badge.textContent = 'Resolved'; badge.className = 'badge badge-green'; }
-        }
+        var r3 = btn.closest('tr'), badge = r3 ? r3.querySelector('.badge') : null;
+        if (badge) { badge.textContent = 'Resolved'; badge.className = 'badge badge-green'; }
         showToast('Resolved', 'success');
-    } else if (text === 'View') {
-        showToast('View details — coming soon', 'info');
-    }
+    } else if (text === 'View') { showToast('View details — coming soon', 'info'); }
 });
 
-// ═══ FORM BUTTONS ═══
+// ═══ FORM SAVING ═══
 
 document.addEventListener('click', function(e) {
-    var btn = e.target.closest('button');
-    if (!btn) return;
+    var btn = e.target.closest('button'); if (!btn) return;
     var text = btn.textContent.trim();
 
     if (text === 'Save House') {
         e.preventDefault();
-        var formCard = btn.closest('.card-body');
-        if (!formCard) return;
-        var inputs = formCard.querySelectorAll('input, select');
-        var location = inputs[2] ? inputs[2].value.trim() : '';
-        var price = inputs[3] ? inputs[3].value.trim() : '';
-        var rooms = inputs[4] ? inputs[4].value.trim() : '';
-        var status = inputs[1] ? inputs[1].value : 'Available';
-        if (!location || !price) { showToast('Please fill Location and Price', 'error'); return; }
-
-        var table = document.querySelector('#page-house table tbody');
-        if (!table) return;
-        var count = table.querySelectorAll('tr').length + 1;
-        var id = 'H-' + String(count).padStart(3, '0');
-        var statusBadge = status === 'Available' ? 'badge-green' : status === 'Occupied' ? 'badge-purple' : 'badge-yellow';
-
+        var loc = document.getElementById('house-location'), pr = document.getElementById('house-price'),
+            rm = document.getElementById('house-rooms'), st = document.getElementById('house-status');
+        if (!loc || !pr || !loc.value.trim() || !pr.value.trim()) { showToast('Please fill Location and Price', 'error'); return; }
+        var table = document.querySelector('#page-house table tbody'); if (!table) return;
+        var count = table.querySelectorAll('tr').length + 1, id = 'H-' + String(count).padStart(3, '0');
+        var statusVal = st ? st.value : 'Available';
+        var badgeClass = statusVal === 'Available' ? 'badge-green' : statusVal === 'Occupied' ? 'badge-purple' : 'badge-yellow';
         var row = table.insertRow();
         row.innerHTML = '<td style="color:var(--gray-400);font-size:12px;">' + count + '</td>' +
-            '<td><span class="id-label">' + id + '</span></td>' +
-            '<td>' + location + '</td>' +
-            '<td style="font-weight:600;color:var(--green-700);">RM ' + price + '</td>' +
-            '<td>' + (rooms || '-') + '</td>' +
-            '<td><span class="badge ' + statusBadge + '">' + status + '</span></td>' +
+            '<td><span class="id-label">' + id + '</span></td><td>' + loc.value.trim() + '</td>' +
+            '<td style="font-weight:600;color:var(--green-700);">RM ' + pr.value.trim() + '</td>' +
+            '<td>' + (rm ? rm.value : '-') + '</td>' +
+            '<td><span class="badge ' + badgeClass + '">' + statusVal + '</span></td>' +
             '<td><div class="actions-cell"><button class="topbar-btn btn-warning btn-sm">Edit</button><button class="topbar-btn btn-danger btn-sm">Delete</button></div></td>';
-        updateFooter(row.closest('table'));
+        updateFooter(table); updateDashboardStats();
         showToast(id + ' saved!', 'success');
-        inputs[2].value = ''; inputs[3].value = ''; inputs[4].value = '';
+        loc.value = ''; pr.value = ''; if (rm) rm.value = '';
 
     } else if (text === 'Save Tenant') {
         e.preventDefault();
-        var card = btn.closest('.card-body');
-        if (!card) return;
-        var inputs = card.querySelectorAll('input, select');
-        var name = inputs[1] ? inputs[1].value.trim() : '';
-        var phone = inputs[2] ? inputs[2].value.trim() : '';
-        var matric = inputs[3] ? inputs[3].value.trim() : '';
-        var house = inputs[4] ? inputs[4].value : '';
-        var date = inputs[5] ? inputs[5].value : '';
-        if (!name || !phone) { showToast('Please fill Name and Phone', 'error'); return; }
-
-        var table = document.querySelector('#page-tenant table tbody');
-        if (!table) return;
-        var count = table.querySelectorAll('tr').length + 1;
-        var id = 'T-' + String(count).padStart(3, '0');
-        var displayDate = date ? new Date(date).toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'}) : '-';
-
+        var name = document.getElementById('tenant-name'), phone = document.getElementById('tenant-phone'),
+            matric = document.getElementById('tenant-matric'), house = document.getElementById('tenant-house'),
+            date = document.getElementById('tenant-date');
+        if (!name || !phone || !name.value.trim() || !phone.value.trim()) { showToast('Please fill Name and Phone', 'error'); return; }
+        var table = document.querySelector('#page-tenant table tbody'); if (!table) return;
+        var count = table.querySelectorAll('tr').length + 1, id = 'T-' + String(count).padStart(3, '0');
+        var dispDate = date && date.value ? new Date(date.value + 'T00:00:00').toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '-';
+        var houseVal = house ? house.value : '';
         var row = table.insertRow();
         row.innerHTML = '<td style="color:var(--gray-400);font-size:12px;">' + count + '</td>' +
             '<td><span class="id-label">' + id + '</span></td>' +
-            '<td style="font-weight:600;color:var(--gray-800);">' + name + '</td>' +
-            '<td>' + phone + '</td>' +
-            '<td style="font-size:11px;color:var(--gray-400);">' + (matric || '-') + '</td>' +
-            '<td><span class="badge badge-purple">' + (house.split('|')[0] || house || '-') + '</span></td>' +
-            '<td style="font-size:12px;color:var(--gray-500);">' + displayDate + '</td>' +
+            '<td style="font-weight:600;color:var(--gray-800);">' + name.value.trim() + '</td>' +
+            '<td>' + phone.value.trim() + '</td>' +
+            '<td style="font-size:11px;color:var(--gray-400);">' + (matric ? matric.value.trim() || '-' : '-') + '</td>' +
+            '<td><span class="badge badge-purple">' + (houseVal.split('|')[0] || houseVal || '-') + '</span></td>' +
+            '<td style="font-size:12px;color:var(--gray-500);">' + dispDate + '</td>' +
             '<td><div class="actions-cell"><button class="topbar-btn btn-warning btn-sm">Edit</button><button class="topbar-btn btn-danger btn-sm">Delete</button></div></td>';
-        updateFooter(row.closest('table'));
+        updateFooter(table); updateDashboardStats();
         showToast(id + ' saved!', 'success');
-        inputs[1].value = ''; inputs[2].value = ''; inputs[3].value = '';
+        name.value = ''; phone.value = ''; if (matric) matric.value = '';
 
     } else if (text === 'Submit Complaint') {
         e.preventDefault();
-        var card = btn.closest('.card-body');
-        if (!card) return;
-        var inputs = card.querySelectorAll('input, select, textarea');
-        var date = inputs[1] ? inputs[1].value : '';
-        var tenant = inputs[2] ? inputs[2].value : '';
-        var status = inputs[3] ? inputs[3].value : 'Pending';
-        var desc = inputs[4] ? inputs[4].value.trim() : '';
-        if (!desc) { showToast('Please fill the description', 'error'); return; }
-
-        var table = document.querySelector('#page-complaint table tbody');
-        if (!table) return;
-        var count = table.querySelectorAll('tr').length + 1;
-        var id = 'C-' + String(count).padStart(3, '0');
-        var tenantName = tenant.split('|')[1] ? tenant.split('|')[1].trim() : (tenant || '-');
-        var tenantInfo = tenant.split('|')[0] ? tenant.split('|')[0].trim() : '';
-        var displayDate = date ? new Date(date + 'T00:00:00').toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'}) : '-';
-        var statusClass = status === 'Pending' ? 'badge-red' : status === 'In Progress' ? 'badge-yellow' : 'badge-green';
-
+        var desc = document.getElementById('complaint-desc'), tenant = document.getElementById('complaint-tenant'),
+            status = document.getElementById('complaint-status'), date = document.getElementById('complaint-date');
+        if (!desc || !desc.value.trim()) { showToast('Please fill the description', 'error'); return; }
+        var table = document.querySelector('#page-complaint table tbody'); if (!table) return;
+        var count = table.querySelectorAll('tr').length + 1, id = 'C-' + String(count).padStart(3, '0');
+        var tenantVal = tenant ? tenant.value : '';
+        var tenantName = tenantVal.split('|')[1] ? tenantVal.split('|')[1].trim() : (tenantVal || '-');
+        var tenantInfo = tenantVal.split('|')[0] ? tenantVal.split('|')[0].trim() : '';
+        var dispDate = date && date.value ? new Date(date.value + 'T00:00:00').toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '-';
+        var stVal = status ? status.value : 'Pending';
+        var stClass = stVal === 'Pending' ? 'badge-red' : stVal === 'In Progress' ? 'badge-yellow' : 'badge-green';
         var row = table.insertRow();
         row.innerHTML = '<td style="color:var(--gray-400);font-size:12px;">' + count + '</td>' +
             '<td><span class="id-label">' + id + '</span></td>' +
-            '<td style="max-width:200px;"><div style="font-weight:500;color:var(--gray-800);">' + desc + '</div><div style="font-size:11px;color:var(--gray-400);">New submission</div></td>' +
+            '<td style="max-width:200px;"><div style="font-weight:500;color:var(--gray-800);">' + desc.value.trim() + '</div><div style="font-size:11px;color:var(--gray-400);">New submission</div></td>' +
             '<td><div style="font-weight:600;font-size:12px;color:var(--purple-700);">' + tenantName + '</div><div style="font-size:10px;color:var(--gray-400);">' + tenantInfo + '</div></td>' +
-            '<td style="font-size:12px;color:var(--gray-500);">' + displayDate + '</td>' +
-            '<td><span class="badge ' + statusClass + '">' + status + '</span></td>' +
+            '<td style="font-size:12px;color:var(--gray-500);">' + dispDate + '</td>' +
+            '<td><span class="badge ' + stClass + '">' + stVal + '</span></td>' +
             '<td><div class="actions-cell"><button class="topbar-btn btn-green btn-sm">Resolve</button><button class="topbar-btn btn-warning btn-sm">Edit</button><button class="topbar-btn btn-danger btn-sm">Delete</button></div></td>';
-        updateFooter(row.closest('table'));
+        updateFooter(table); updateDashboardStats();
         showToast(id + ' submitted!', 'success');
-        inputs[4].value = '';
+        desc.value = '';
 
     } else if (text === 'Clear Form') {
         e.preventDefault();
         var fc = btn.closest('.card-body');
-        if (fc) {
-            fc.querySelectorAll('input:not([disabled]), select, textarea').forEach(function(el) {
-                if (el.tagName === 'SELECT') el.selectedIndex = 0;
-                else el.value = '';
-            });
-        }
+        if (fc) fc.querySelectorAll('input:not([disabled]), select, textarea').forEach(function(el){
+            if (el.tagName === 'SELECT') el.selectedIndex = 0; else el.value = '';
+        });
         showToast('Form cleared', 'info');
     }
 });
@@ -345,19 +309,13 @@ document.addEventListener('click', function(e) {
 // ═══ TOPBAR BUTTONS ═══
 
 document.addEventListener('click', function(e) {
-    var btn = e.target.closest('.topbar-btn');
-    if (!btn) return;
+    var btn = e.target.closest('.topbar-btn'); if (!btn) return;
     var text = btn.textContent.trim();
-    if (text === 'Export Report') {
+    if (text === 'Export Report') { e.preventDefault(); showToast('Exporting report... (demo)', 'info'); }
+    else if (text === '+ New Record' || text === '+ Add New House' || text === '+ Register Tenant' || text === '+ New Complaint') {
         e.preventDefault();
-        showToast('Exporting report... (demo)', 'info');
-    } else if (text === '+ New Record' || text === '+ Add New House' || text === '+ Register Tenant' || text === '+ New Complaint') {
-        e.preventDefault();
-        var page = btn.closest('.main-content');
-        if (page) {
-            var form = page.querySelector('.card[id$="-form-card"]') || page.querySelector('.card');
-            if (form) form.scrollIntoView({ behavior: 'smooth' });
-        }
+        var form = btn.closest('.main-content').querySelector('.card[id$="-form-card"]') || btn.closest('.main-content').querySelector('.card');
+        if (form) form.scrollIntoView({ behavior: 'smooth' });
         showToast('Scroll down to add a new record', 'info');
     }
 });
