@@ -122,6 +122,14 @@ function switchPageByName(name) {
     if (page) page.classList.add('active');
     // Update stats when switching to dashboard
     if (name === 'dashboard') updateDashboardStats();
+    // Update footer when switching to management pages
+    if (name === 'house' || name === 'tenant' || name === 'complaint') {
+        var table = page.querySelector('table');
+        if (table) {
+            table.querySelectorAll('tbody tr').forEach(function(r) { r.style.display = ''; });
+            updateFooter(table);
+        }
+    }
     // Clear any lingering edit state
     document.querySelectorAll('[data-editing-id]').forEach(function(el) {
         el.removeAttribute('data-editing-id');
