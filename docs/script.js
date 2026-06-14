@@ -536,7 +536,5 @@ document.addEventListener('click', function(e) {
     showToast('Password reset link sent to admin email (demo)', 'info');
 });
 
-// ═══ INIT: Update stats on first load ═══
-document.addEventListener('DOMContentLoaded', function() {
-    updateDashboardStats();
-});
+// ═══ INIT: Run stats update immediately ═══
+updateDashboardStats();
