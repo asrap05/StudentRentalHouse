@@ -3,6 +3,14 @@
  * Client-side interactivity: navigation, filtering, pagination, toasts, form saving
  */
 
+// ═══ USER STORE (in-memory, survives page switches) ═══
+
+var userStore = {
+    admin: { password: 'admin123', name: 'Admin User', role: 'Administrator', avatar: 'AD' },
+    staff: { password: 'staff123', name: 'Staff User', role: 'Staff', avatar: 'ST' },
+    currentUser: null
+};
+
 // ═══ LOGIN VALIDATION ═══
 
 function doLogin() {
@@ -11,17 +19,14 @@ function doLogin() {
     var err = document.getElementById('login-error');
     var user = u ? u.value.trim() : '', pass = p ? p.value : '';
 
-    if (user === 'admin' && pass === 'admin123') {
+    var account = userStore[user];
+    if (account && pass === account.password) {
+        userStore.currentUser = user;
         if (err) err.style.display = 'none';
-        updateSidebar('Admin User', 'Administrator', 'AD');
+        updateSidebar(account.name, account.role, account.avatar);
         switchPageByName('dashboard');
-        showToast('Welcome back, Admin!', 'success'); return;
-    }
-    if (user === 'staff' && pass === 'staff123') {
-        if (err) err.style.display = 'none';
-        updateSidebar('Staff User', 'Staff', 'ST');
-        switchPageByName('dashboard');
-        showToast('Welcome back, Staff!', 'success'); return;
+        showToast('Welcome back, ' + account.name.split(' ')[0] + '!', 'success');
+        return;
     }
     if (err) { err.textContent = '✗ Invalid username or password.'; err.style.display = 'block'; }
     if (u) { u.style.borderColor = '#dc2626'; setTimeout(function(){u.style.borderColor='';},1500); }
@@ -513,13 +518,16 @@ function changePassword() {
     var cf = document.getElementById('settings-confirm-pwd');
     var msg = document.getElementById('settings-msg');
     if (!cur || !nw || !cf) return;
-    if (!cur.value.trim()) { msg.style.display = 'block'; msg.style.background = '#fee2e2'; msg.style.color = '#dc2626'; msg.textContent = '✗ Please enter your current password.'; return; }
+    var username = userStore.currentUser;
+    if (!username) { msg.style.display = 'block'; msg.style.background = '#fee2e2'; msg.style.color = '#dc2626'; msg.textContent = '✗ Not logged in.'; return; }
+    if (cur.value !== userStore[username].password) { msg.style.display = 'block'; msg.style.background = '#fee2e2'; msg.style.color = '#dc2626'; msg.textContent = '✗ Current password is incorrect.'; return; }
     if (!nw.value.trim() || nw.value.length < 4) { msg.style.display = 'block'; msg.style.background = '#fee2e2'; msg.style.color = '#dc2626'; msg.textContent = '✗ New password must be at least 4 characters.'; return; }
     if (nw.value !== cf.value) { msg.style.display = 'block'; msg.style.background = '#fee2e2'; msg.style.color = '#dc2626'; msg.textContent = '✗ Passwords do not match.'; return; }
+    userStore[username].password = nw.value;
     msg.style.display = 'block'; msg.style.background = '#dcfce7'; msg.style.color = '#16a34a';
-    msg.textContent = '✓ Password updated successfully!';
+    msg.textContent = '✓ Password updated! Use the new password on next login.';
     cur.value = ''; nw.value = ''; cf.value = '';
-    setTimeout(function() { msg.style.display = 'none'; }, 3000);
+    setTimeout(function() { msg.style.display = 'none'; }, 4000);
 }
 
 // ═══ SETTINGS — SAVE PROFILE ═══
@@ -529,7 +537,11 @@ function saveProfile() {
     var role = document.getElementById('settings-role-select');
     var email = document.getElementById('settings-email');
     if (!name || !name.value.trim()) { showToast('Please enter a display name', 'error'); return; }
-    // Update sidebar user info
+    var username = userStore.currentUser;
+    if (username) {
+        userStore[username].name = name.value.trim();
+        userStore[username].role = role ? role.value : 'Administrator';
+    }
     var avatar = name.value.trim().charAt(0).toUpperCase();
     updateSidebar(name.value.trim(), role ? role.value : 'Administrator', avatar);
     showToast('Profile saved!', 'success');
