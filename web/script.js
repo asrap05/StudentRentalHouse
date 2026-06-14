@@ -565,3 +565,29 @@ document.querySelectorAll('table').forEach(function(t) {
     updateFooter(t);
 });
 
+// ═══ VIEW COMPLAINT MODAL ═══
+
+function viewComplaint(btn) {
+    var row = btn.closest('tr'); if (!row) return;
+    var cells = row.querySelectorAll('td');
+    var id = row.querySelector('.id-label');
+    var tenant = cells[3] ? cells[3].textContent.trim() : '-';
+    var date = cells[4] ? cells[4].textContent.trim() : '-';
+    var status = cells[5] ? cells[5].textContent.trim() : '-';
+    var descDiv = cells[2] ? cells[2].querySelector('div:first-child') : null;
+    var desc = descDiv ? descDiv.textContent.trim() : '-';
+
+    document.getElementById('modal-id').textContent = id ? id.textContent.trim() : '-';
+    document.getElementById('modal-date').textContent = date;
+    document.getElementById('modal-tenant').textContent = tenant;
+    document.getElementById('modal-status').textContent = status;
+    document.getElementById('modal-desc').textContent = desc;
+
+    var modal = document.getElementById('view-modal');
+    modal.style.display = 'flex';
+}
+
+function closeModal() {
+    document.getElementById('view-modal').style.display = 'none';
+}
+
