@@ -1,0 +1,632 @@
+<%-- 
+    index.jsp — Student Rental House Management System
+    Single Page Application with 5 pages: Login, Dashboard, House, Tenant, Complaint
+    Uses JSP includes to eliminate code duplication.
+--%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%@ include file="includes/head.jsp" %>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════
+     PAGE 1 — LOGIN
+     ════════════════════════════════════════════ -->
+<div id="page-login" class="page active">
+    <div class="login-outer">
+        <!-- Left: Branding -->
+        <div class="login-left">
+            <div class="login-left-content">
+                <div class="login-brand-icon">
+                    <svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V21H3V9.5z"/></svg>
+                </div>
+                <div class="login-brand-title">Universiti Malaysia Terengganu<br/>Student Rental House Management</div>
+                <div class="login-brand-sub">A centralized platform for managing off-campus student accommodations, tenants, and complaints efficiently.</div>
+            </div>
+        </div>
+
+        <!-- Right: Login Form -->
+        <div class="login-right">
+            <div class="login-form-wrap">
+                <div class="login-form-header">
+                    <h2>Welcome Back</h2>
+                    <p>Sign in to access the management dashboard</p>
+                </div>
+
+                <div class="login-input-group">
+                    <label class="login-label">Username / Staff ID</label>
+                    <div class="login-input-wrap">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a7 7 0 0113 0"/></svg>
+                        <input class="login-input" type="text" placeholder="e.g. admin or S12345" value="admin"/>
+                    </div>
+                </div>
+
+                <div class="login-input-group">
+                    <label class="login-label">Password</label>
+                    <div style="position:relative;">
+                        <div class="login-input-wrap">
+                            <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                            <input class="login-input" type="password" placeholder="Enter your password" value="secret123" style="padding-right:40px;"/>
+                        </div>
+                        <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="login-remember">
+                    <input type="checkbox" id="remember" checked/>
+                    <label for="remember">Remember me</label>
+                    <a class="login-forgot" href="#">Forgot password?</a>
+                </div>
+
+                <div id="login-error" style="color:#dc2626;font-size:13px;font-weight:600;margin-bottom:12px;display:none;text-align:center;"></div>
+
+                <button class="login-btn" onclick="doLogin()">Sign In to Dashboard</button>
+
+                <div class="login-divider">
+                    <div class="login-divider-line"></div><span>System Info</span><div class="login-divider-line"></div>
+                </div>
+
+                <div class="login-role-hint">
+                    <p><strong>Admin:</strong> admin / admin123 &nbsp;|&nbsp; <strong>Staff:</strong> staff / staff123</p>
+                </div>
+
+                <div class="login-footer">&copy; 2025 Student Rental House &mdash; CSM3023</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     PAGE 2 — DASHBOARD
+     ════════════════════════════════════════════ -->
+<div id="page-dashboard" class="page">
+    <div class="app-layout">
+        <% request.setAttribute("activePage", "dashboard"); %>
+        <jsp:include page="includes/sidebar.jsp" />
+
+        <div class="main-content">
+            <!-- Top Bar -->
+            <div class="topbar">
+                <div class="topbar-left">
+                    <h2>Dashboard</h2>
+                    <p id="dash-welcome">Welcome back, Admin &mdash; system overview</p>
+                </div>
+                <div class="topbar-right">
+                    <button class="topbar-btn btn-outline" onclick="exportReport()">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline;vertical-align:middle;margin-right:4px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                        Export Report
+                    </button>
+                    <button class="topbar-btn btn-green" onclick="newRecord()">+ New Record</button>
+                </div>
+            </div>
+
+            <div class="page-body">
+                <!-- Stats Row -->
+                <div class="stats-grid">
+                    <div class="stat-card green">
+                        <div class="stat-icon green"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M3 9.5L12 3l9 6.5V21H3V9.5z"/></svg></div>
+                        <div class="stat-value" id="stat-total-houses">12</div>
+                        <div class="stat-label">Total Houses</div>
+                        <div class="stat-change up" id="stat-change-houses">+2 this month</div>
+                    </div>
+                    <div class="stat-card purple">
+                        <div class="stat-icon purple"><svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a7 7 0 0113 0"/></svg></div>
+                        <div class="stat-value" id="stat-active-tenants">8</div>
+                        <div class="stat-label">Active Tenants</div>
+                        <div class="stat-change up" id="stat-change-tenants">+1 new tenant</div>
+                    </div>
+                    <div class="stat-card teal">
+                        <div class="stat-icon teal"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+                        <div class="stat-value" id="stat-open-complaints">3</div>
+                        <div class="stat-label">Open Complaints</div>
+                        <div class="stat-change down" id="stat-change-complaints">2 pending review</div>
+                    </div>
+                    <div class="stat-card amber">
+                        <div class="stat-icon amber"><svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
+                        <div class="stat-value" id="stat-vacant-houses">4</div>
+                        <div class="stat-label">Vacant Houses</div>
+                        <div class="stat-change up" id="stat-change-vacant">Available now</div>
+                    </div>
+                </div>
+
+                <!-- Occupancy + Activity -->
+                <div class="two-col" style="margin-bottom:20px;">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title"><div class="card-title-dot"></div>House Occupancy Overview</div>
+                            <button class="topbar-btn btn-outline" style="font-size:11px;padding:5px 12px;" onclick="switchPageByName('house')">View All</button>
+                        </div>
+                        <div class="card-body">
+                            <div style="display:flex;flex-direction:column;gap:10px;">
+                                <div>
+                                    <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                                        <span style="font-size:12px;color:var(--gray-600);font-weight:600;">Occupied</span>
+                                        <span style="font-size:12px;font-weight:700;color:var(--purple-700);" id="occ-occupied">8 / 12</span>
+                                    </div>
+                                    <div style="background:var(--gray-100);border-radius:20px;height:10px;overflow:hidden;">
+                                        <div style="width:66.6%;height:100%;background:linear-gradient(90deg,var(--purple-400),var(--purple-600));border-radius:20px;"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                                        <span style="font-size:12px;color:var(--gray-600);font-weight:600;">Vacant</span>
+                                        <span style="font-size:12px;font-weight:700;color:var(--green-600);" id="occ-vacant">4 / 12</span>
+                                    </div>
+                                    <div style="background:var(--gray-100);border-radius:20px;height:10px;overflow:hidden;">
+                                        <div style="width:33.3%;height:100%;background:linear-gradient(90deg,var(--green-400),var(--green-600));border-radius:20px;" id="occ-bar-vacant"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                                        <span style="font-size:12px;color:var(--gray-600);font-weight:600;">Maintenance</span>
+                                        <span style="font-size:12px;font-weight:700;color:#d97706;" id="occ-maintenance">1 / 12</span>
+                                    </div>
+                                    <div style="background:var(--gray-100);border-radius:20px;height:10px;overflow:hidden;">
+                                        <div style="width:8.3%;height:100%;background:linear-gradient(90deg,#fbbf24,#f59e0b);border-radius:20px;" id="occ-bar-maintenance"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;">
+                                <div style="text-align:center;"><div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--purple-700);" id="occ-rate">67%</div><div style="font-size:11px;color:var(--gray-400);font-weight:500;">Occupancy Rate</div></div>
+                                <div style="text-align:center;"><div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--green-600);" id="occ-revenue">RM 9,400</div><div style="font-size:11px;color:var(--gray-400);font-weight:500;">Monthly Revenue</div></div>
+                                <div style="text-align:center;"><div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#d97706;" id="occ-avg">RM 1,175</div><div style="font-size:11px;color:var(--gray-400);font-weight:500;">Avg. Rent / Unit</div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header"><div class="card-title"><div class="card-title-dot"></div>Recent Activity</div></div>
+                        <div class="card-body" style="padding-top:8px;">
+                            <div class="activity-list" id="activity-list">
+                                <div class="activity-item">
+                                    <div class="activity-dot" style="background:var(--green-500);"></div>
+                                    <div><div class="activity-text">New tenant <strong>Ahmad Zaki</strong> registered to House H-05</div><div class="activity-time">Today, 09:14 AM</div></div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-dot" style="background:var(--purple-500);"></div>
+                                    <div><div class="activity-text">Complaint <strong>#C-008</strong> status updated to Resolved</div><div class="activity-time">Today, 08:52 AM</div></div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-dot" style="background:#f59e0b;"></div>
+                                    <div><div class="activity-text">House <strong>H-03</strong> marked as Under Maintenance</div><div class="activity-time">Yesterday, 04:30 PM</div></div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-dot" style="background:#dc2626;"></div>
+                                    <div><div class="activity-text">New complaint by <strong>Nurul Aina</strong> — water leakage</div><div class="activity-time">Yesterday, 02:10 PM</div></div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-dot" style="background:var(--green-500);"></div>
+                                    <div><div class="activity-text">House <strong>H-09</strong> added by Admin</div><div class="activity-time">18 May 2025, 11:00 AM</div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Access -->
+                <div class="section-divider"><h3>Quick Access</h3><div class="section-divider-line"></div></div>
+                <div class="quick-links" style="margin-bottom:24px;">
+                    <div class="quick-link-card" onclick="switchPageByName('house')">
+                        <div class="quick-link-icon" style="background:var(--green-100);"><svg viewBox="0 0 24 24" stroke="var(--green-600)" stroke-width="2"><path d="M3 9.5L12 3l9 6.5V21H3V9.5z"/></svg></div>
+                        <div><div class="quick-link-label">Manage Houses</div><div class="quick-link-desc">Add, edit, or remove house records</div></div>
+                    </div>
+                    <div class="quick-link-card" onclick="switchPageByName('tenant')">
+                        <div class="quick-link-icon" style="background:var(--purple-100);"><svg viewBox="0 0 24 24" stroke="var(--purple-600)" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a7 7 0 0113 0"/></svg></div>
+                        <div><div class="quick-link-label">Manage Tenants</div><div class="quick-link-desc">Register or update tenant details</div></div>
+                    </div>
+                    <div class="quick-link-card" onclick="switchPageByName('complaint')">
+                        <div class="quick-link-icon" style="background:#dbeafe;"><svg viewBox="0 0 24 24" stroke="#1d4ed8" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+                        <div><div class="quick-link-label">View Complaints</div><div class="quick-link-desc">Review and resolve open complaints</div></div>
+                    </div>
+                </div>
+
+                <!-- Summary Tables -->
+                <div class="two-col">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title"><div class="card-title-dot"></div>Recent Houses</div>
+                            <button class="topbar-btn btn-outline" onclick="switchPageByName('house')" style="font-size:11px;padding:5px 12px;">View All</button>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead><tr><th>ID</th><th>Location</th><th>Price</th><th>Status</th></tr></thead>
+                                <tbody id="dash-houses-tbody">
+                                    <tr><td><span class="id-label">H-001</span></td><td>Jalan Universiti 12</td><td>RM 800</td><td><span class="badge badge-green">Available</span></td></tr>
+                                    <tr><td><span class="id-label">H-002</span></td><td>Taman Siswa Blk B</td><td>RM 950</td><td><span class="badge badge-purple">Occupied</span></td></tr>
+                                    <tr><td><span class="id-label">H-003</span></td><td>Kolej Utama Row 4</td><td>RM 700</td><td><span class="badge badge-yellow">Maintenance</span></td></tr>
+                                    <tr><td><span class="id-label">H-004</span></td><td>Jalan Kampus 5A</td><td>RM 1,100</td><td><span class="badge badge-purple">Occupied</span></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title"><div class="card-title-dot"></div>Open Complaints</div>
+                            <button class="topbar-btn btn-outline" onclick="switchPageByName('complaint')" style="font-size:11px;padding:5px 12px;">View All</button>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead><tr><th>ID</th><th>Description</th><th>Date</th><th>Status</th></tr></thead>
+                                <tbody id="dash-complaints-tbody">
+                                    <tr><td><span class="id-label">C-006</span></td><td>Pipe leakage in kitchen</td><td>20 May</td><td><span class="badge badge-red">Pending</span></td></tr>
+                                    <tr><td><span class="id-label">C-007</span></td><td>Broken window lock</td><td>19 May</td><td><span class="badge badge-yellow">In Progress</span></td></tr>
+                                    <tr><td><span class="id-label">C-008</span></td><td>Electricity tripping</td><td>18 May</td><td><span class="badge badge-green">Resolved</span></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     PAGE 3 — HOUSE MANAGEMENT
+     ════════════════════════════════════════════ -->
+<div id="page-house" class="page">
+    <div class="app-layout">
+        <% request.setAttribute("activePage", "house"); %>
+        <jsp:include page="includes/sidebar.jsp" />
+
+        <div class="main-content">
+            <div class="topbar">
+                <div class="topbar-left">
+                    <h2>House Management</h2>
+                    <p>Manage all rental house records &mdash; CRUD operations</p>
+                </div>
+                <div class="topbar-right">
+                    <button class="topbar-btn btn-green" onclick="document.getElementById('house-form-card').scrollIntoView({behavior:'smooth'})">+ Add New House</button>
+                </div>
+            </div>
+            <div class="page-body">
+                <!-- Form -->
+                <div class="section-divider"><h3>Add / Edit House Record</h3><div class="section-divider-line"></div></div>
+                <div class="card" id="house-form-card" style="margin-bottom:24px;">
+                    <div class="card-header">
+                        <div class="card-title"><div class="card-title-dot"></div>House Form <span class="anno">HouseServlet &rarr; doPost()</span></div>
+                        <span class="badge badge-green">Add New</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">House ID <span class="req">*</span></label>
+                                <input class="form-input" type="text" placeholder="Auto-generated (e.g. H-013)" disabled style="background:var(--gray-50);color:var(--gray-400);"/>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">House Status <span class="req">*</span></label>
+                                <select class="form-select">
+                                    <option value="">-- Select Status --</option>
+                                    <option value="available" selected>Available</option>
+                                    <option value="occupied">Occupied</option>
+                                    <option value="maintenance">Under Maintenance</option>
+                                </select>
+                            </div>
+                            <div class="form-group form-full">
+                                <label class="form-label">Location / Address <span class="req">*</span></label>
+                                <input class="form-input" type="text" placeholder="e.g. No. 14, Jalan Universiti, 43600 Bangi, Selangor"/>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Monthly Rental Price (RM) <span class="req">*</span></label>
+                                <input class="form-input" type="number" placeholder="e.g. 850"/>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Number of Rooms</label>
+                                <input class="form-input" type="number" placeholder="e.g. 3"/>
+                            </div>
+                        </div>
+                        <div class="form-actions" style="margin-top:16px;">
+                            <button class="topbar-btn btn-green" onclick="saveRecord('house')">
+                                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline;vertical-align:middle;margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg>
+                                Save House
+                            </button>
+                            <button class="topbar-btn btn-outline" onclick="clearForm(this)">Clear Form</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="section-divider"><h3>All Houses</h3><div class="section-divider-line"></div></div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title"><div class="card-title-dot"></div>House Records <span class="anno">HouseServlet &rarr; doGet()</span></div>
+                        <div class="filter-bar">
+                            <div class="search-bar-wrap">
+                                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                                <input class="search-input" type="text" placeholder="Search location or ID..."/>
+                            </div>
+                            <select class="form-select" style="width:auto;padding:8px 12px;">
+                                <option>All Status</option><option>Available</option><option>Occupied</option><option>Maintenance</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead><tr><th>#</th><th>House ID</th><th>Location / Address</th><th>Monthly Price</th><th>Rooms</th><th>Status</th><th>Actions</th></tr></thead>
+                            <tbody>
+                                <tr><td style="color:var(--gray-400);font-size:12px;">1</td><td><span class="id-label">H-001</span></td><td>No. 12, Jalan Universiti, Bangi</td><td style="font-weight:600;color:var(--green-700);">RM 800</td><td>3</td><td><span class="badge badge-green">Available</span></td><td><div class="actions-cell"><button class="topbar-btn btn-warning btn-sm">Edit</button><button class="topbar-btn btn-danger btn-sm">Delete</button></div></td></tr>
+                                <tr><td style="color:var(--gray-400);font-size:12px;">2</td><td><span class="id-label">H-002</span></td><td>Taman Siswa, Block B, Kajang</td><td style="font-weight:600;color:var(--green-700);">RM 950</td><td>4</td><td><span class="badge badge-purple">Occupied</span></td><td><div class="actions-cell"><button class="topbar-btn btn-warning btn-sm">Edit</button><button class="topbar-btn btn-danger btn-sm">Delete</button></div></td></tr>
+                                <tr><td style="color:var(--gray-400);font-size:12px;">3</td><td><span class="id-label">H-003</span></td><td>Kolej Utama Row 4, Serdang</td><td style="font-weight:600;color:var(--green-700);">RM 700</td><td>2</td><td><span class="badge badge-yellow">Maintenance</span></td><td><div class="actions-cell"><button class="topbar-btn btn-warning btn-sm">Edit</button><button class="topbar-btn btn-danger btn-sm">Delete</button></div></td></tr>
+                                <tr><td style="color:var(--gray-400);font-size:12px;">4</td><td><span class="id-label">H-004</span></td><td>Jalan Kampus 5A, UKM</td><td style="font-weight:600;color:var(--green-700);">RM 1,100</td><td>5</td><td><span class="badge badge-purple">Occupied</span></td><td><div class="actions-cell"><button class="topbar-btn btn-warning btn-sm">Edit</button><button class="topbar-btn btn-danger btn-sm">Delete</button></div></td></tr>
+                                <tr><td style="color:var(--gray-400);font-size:12px;">5</td><td><span class="id-label">H-005</span></td><td>Sri Mawar Apt, Lot 7, Nilai</td><td style="font-weight:600;color:var(--green-700);">RM 750</td><td>3</td><td><span class="badge badge-green">Available</span></td><td><div class="actions-cell"><button class="topbar-btn btn-warning btn-sm">Edit</button><button class="topbar-btn btn-danger btn-sm">Delete</button></div></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-footer">
+                        <div class="table-info">Showing 1 - 5 of 12 records</div>
+                        <div class="pagination">
+                            <div class="pg-btn"><svg viewBox="0 0 24 24" width="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></div>
+                            <div class="pg-btn pg-num active">1</div><div class="pg-btn pg-num">2</div><div class="pg-btn pg-num">3</div>
+                            <div class="pg-btn"><svg viewBox="0 0 24 24" width="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     PAGE 4 — TENANT MANAGEMENT
+     ════════════════════════════════════════════ -->
+<div id="page-tenant" class="page">
+    <div class="app-layout">
+        <% request.setAttribute("activePage", "tenant"); %>
+        <jsp:include page="includes/sidebar.jsp" />
+
+        <div class="main-content">
+            <div class="topbar">
+                <div class="topbar-left"><h2>Tenant Management</h2><p>Register and manage all tenant information</p></div>
+                <div class="topbar-right"><button class="topbar-btn btn-green">+ Register Tenant</button></div>
+            </div>
+            <div class="page-body">
+                <div class="section-divider"><h3>Register / Edit Tenant</h3><div class="section-divider-line"></div></div>
+                <div class="card" style="margin-bottom:24px;">
+                    <div class="card-header">
+                        <div class="card-title"><div class="card-title-dot"></div>Tenant Form <span class="anno">TenantServlet &rarr; doPost()</span></div>
+                        <span class="badge badge-green">Add New</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-grid">
+                            <div class="form-group"><label class="form-label">Tenant ID <span class="req">*</span></label><input class="form-input" type="text" placeholder="Auto-generated (e.g. T-009)" disabled style="background:var(--gray-50);color:var(--gray-400);"/></div>
+                            <div class="form-group"><label class="form-label">Full Name <span class="req">*</span></label><input class="form-input" type="text" placeholder="e.g. Muhammad Ali bin Hassan"/></div>
+                            <div class="form-group"><label class="form-label">Phone Number <span class="req">*</span></label><input class="form-input" type="tel" placeholder="e.g. 012-345 6789"/></div>
+                            <div class="form-group"><label class="form-label">Student ID / Matric No.</label><input class="form-input" type="text" placeholder="e.g. A21EC0001"/></div>
+                            <div class="form-group"><label class="form-label">Assigned House <span class="req">*</span> <span style="font-size:10px;color:var(--green-600);font-weight:500;">[FK: house_id]</span></label><select class="form-select"><option value="">-- Select Available House --</option><option>H-001 | Jalan Universiti 12 | RM 800</option><option>H-005 | Sri Mawar Apt, Nilai | RM 750</option><option>H-007 | Taman Ilmu Blk A | RM 900</option><option>H-009 | Lorong Ilmu 3 | RM 850</option></select></div>
+                            <div class="form-group"><label class="form-label">Move-in Date</label><input class="form-input" type="date" value="2025-05-20"/></div>
+                            <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" type="email" placeholder="e.g. student@siswa.ukm.edu.my"/></div>
+                            <div class="form-group"><label class="form-label">Gender</label><select class="form-select"><option>-- Select Gender --</option><option>Male</option><option>Female</option></select></div>
+                        </div>
+                        <div class="form-actions" style="margin-top:16px;">
+                            <button class="topbar-btn btn-green" onclick="saveRecord('tenant')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline;vertical-align:middle;margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg>Save Tenant</button>
+                            <button class="topbar-btn btn-outline" onclick="clearForm(this)">Clear Form</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-divider"><h3>All Tenants</h3><div class="section-divider-line"></div></div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title"><div class="card-title-dot"></div>Tenant Records <span class="anno">TenantServlet &rarr; doGet()</span></div>
+                        <div class="filter-bar">
+                            <div class="search-bar-wrap"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input class="search-input" type="text" placeholder="Search name, ID, or phone..."/></div>
+                            <select class="form-select" style="width:auto;padding:8px 12px;"><option>All Houses</option><option>H-002</option><option>H-004</option><option>H-006</option></select>
+                        </div>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead><tr><th>#</th><th>Tenant ID</th><th>Full Name</th><th>Phone</th><th>Matric No.</th><th>Assigned House</th><th>Move-in Date</th><th>Actions</th></tr></thead>
+                            <tbody>
+                                <tr><td style="color:var(--gray-400);font-size:12px;">1</td><td><span class="id-label">T-001</span></td><td style="font-weight:600;color:var(--gray-800);">Ahmad Zaki Ibrahim</td><td>012-345 6789</td><td style="font-size:11px;color:var(--gray-400);">A21EC0011</td><td><span class="badge badge-purple">H-002</span></td><td style="font-size:12px;color:var(--gray-500);">01 Jan 2025</td><td><div class="actions-cell"><button class="topbar-btn btn-warning btn-sm">Edit</button><button class="topbar-btn btn-danger btn-sm">Delete</button></div></td></tr>
+                                <tr><td style="color:var(--gray-400);font-size:12px;">2</td><td><span class="id-label">T-002</span></td><td style="font-weight:600;color:var(--gray-800);">Nurul Aina Mohd Noor</td><td>011-234 5678</td><td style="font-size:11px;color:var(--gray-400);">A21EC0025</td><td><span class="badge badge-purple">H-004</span></td><td style="font-size:12px;color:var(--gray-500);">15 Feb 2025</td><td><div class="actions-cell"><button class="topbar-btn btn-warning btn-sm">Edit</button><button class="topbar-btn btn-danger btn-sm">Delete</button></div></td></tr>
+                                <tr><td style="color:var(--gray-400);font-size:12px;">3</td><td><span class="id-label">T-003</span></td><td style="font-weight:600;color:var(--gray-800);">Lim Wei Jian</td><td>017-890 1234</td><td style="font-size:11px;color:var(--gray-400);">A21CS0044</td><td><span class="badge badge-purple">H-006</span></td><td style="font-size:12px;color:var(--gray-500);">10 Mar 2025</td><td><div class="actions-cell"><button class="topbar-btn btn-warning btn-sm">Edit</button><button class="topbar-btn btn-danger btn-sm">Delete</button></div></td></tr>
+                                <tr><td style="color:var(--gray-400);font-size:12px;">4</td><td><span class="id-label">T-004</span></td><td style="font-weight:600;color:var(--gray-800);">Siti Rahmah Yusof</td><td>013-456 7890</td><td style="font-size:11px;color:var(--gray-400);">A21IT0067</td><td><span class="badge badge-purple">H-008</span></td><td style="font-size:12px;color:var(--gray-500);">22 Apr 2025</td><td><div class="actions-cell"><button class="topbar-btn btn-warning btn-sm">Edit</button><button class="topbar-btn btn-danger btn-sm">Delete</button></div></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-footer">
+                        <div class="table-info">Showing 1 - 4 of 8 records</div>
+                        <div class="pagination">
+                            <div class="pg-btn"><svg viewBox="0 0 24 24" width="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></div>
+                            <div class="pg-btn pg-num active">1</div><div class="pg-btn pg-num">2</div>
+                            <div class="pg-btn"><svg viewBox="0 0 24 24" width="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     PAGE 5 — COMPLAINT MANAGEMENT
+     ════════════════════════════════════════════ -->
+<div id="page-complaint" class="page">
+    <div class="app-layout">
+        <% request.setAttribute("activePage", "complaint"); %>
+        <jsp:include page="includes/sidebar.jsp" />
+
+        <div class="main-content">
+            <div class="topbar">
+                <div class="topbar-left"><h2>Complaint Management</h2><p>Track, manage, and resolve tenant complaints</p></div>
+                <div class="topbar-right"><span class="badge badge-red" style="padding:6px 14px;font-size:12px;" id="complaint-pending-badge">3 Pending</span><button class="topbar-btn btn-green">+ New Complaint</button></div>
+            </div>
+            <div class="page-body">
+                <!-- Status Summary -->
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;">
+                    <div style="background:white;border-radius:var(--radius-md);padding:16px 20px;border:1px solid var(--gray-100);box-shadow:var(--shadow-sm);display:flex;align-items:center;gap:14px;">
+                        <div style="width:40px;height:40px;background:#fee2e2;border-radius:10px;display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#dc2626" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+                        <div><div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#dc2626;" id="comp-count-pending">3</div><div style="font-size:11px;color:var(--gray-400);font-weight:600;">Pending Review</div></div>
+                    </div>
+                    <div style="background:white;border-radius:var(--radius-md);padding:16px 20px;border:1px solid var(--gray-100);box-shadow:var(--shadow-sm);display:flex;align-items:center;gap:14px;">
+                        <div style="width:40px;height:40px;background:#fef3c7;border-radius:10px;display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#d97706" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+                        <div><div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#d97706;" id="comp-count-progress">2</div><div style="font-size:11px;color:var(--gray-400);font-weight:600;">In Progress</div></div>
+                    </div>
+                    <div style="background:white;border-radius:var(--radius-md);padding:16px 20px;border:1px solid var(--gray-100);box-shadow:var(--shadow-sm);display:flex;align-items:center;gap:14px;">
+                        <div style="width:40px;height:40px;background:var(--green-100);border-radius:10px;display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--green-600)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+                        <div><div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--green-600);" id="comp-count-resolved">5</div><div style="font-size:11px;color:var(--gray-400);font-weight:600;">Resolved</div></div>
+                    </div>
+                </div>
+
+                <!-- Form -->
+                <div class="section-divider"><h3>Submit / Edit Complaint</h3><div class="section-divider-line"></div></div>
+                <div class="card" style="margin-bottom:24px;">
+                    <div class="card-header">
+                        <div class="card-title"><div class="card-title-dot"></div>Complaint Form <span class="anno">ComplaintServlet &rarr; doPost()</span></div>
+                        <span class="badge badge-green">Add New</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-grid">
+                            <div class="form-group"><label class="form-label">Complaint ID</label><input class="form-input" type="text" placeholder="Auto-generated (e.g. C-011)" disabled style="background:var(--gray-50);color:var(--gray-400);"/></div>
+                            <div class="form-group"><label class="form-label">Complaint Date <span class="req">*</span></label><input class="form-input" type="date" value="2025-05-21"/></div>
+                            <div class="form-group"><label class="form-label">Reported By (Tenant) <span class="req">*</span> <span style="font-size:10px;color:var(--green-600);font-weight:500;">[FK: tenant_id]</span></label><select class="form-select"><option value="">-- Select Tenant --</option><option>T-001 | Ahmad Zaki Ibrahim | H-002</option><option>T-002 | Nurul Aina Mohd Noor | H-004</option><option>T-003 | Lim Wei Jian | H-006</option><option>T-004 | Siti Rahmah Yusof | H-008</option></select></div>
+                            <div class="form-group"><label class="form-label">Complaint Status <span class="req">*</span></label><select class="form-select"><option>Pending</option><option>In Progress</option><option>Resolved</option></select></div>
+                            <div class="form-group form-full"><label class="form-label">Complaint Description <span class="req">*</span></label><textarea class="form-textarea" placeholder="Describe the issue in detail..."></textarea></div>
+                        </div>
+                        <div class="form-actions" style="margin-top:16px;">
+                            <button class="topbar-btn btn-green" onclick="saveRecord('complaint')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline;vertical-align:middle;margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg>Submit Complaint</button>
+                            <button class="topbar-btn btn-outline" onclick="clearForm(this)">Clear Form</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="section-divider"><h3>All Complaints</h3><div class="section-divider-line"></div></div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title"><div class="card-title-dot"></div>Complaint Records <span class="anno">ComplaintServlet &rarr; doGet()</span></div>
+                        <div class="filter-bar">
+                            <div class="search-bar-wrap"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input class="search-input" type="text" placeholder="Search by ID or tenant..."/></div>
+                            <div class="filter-btn active">All</div><div class="filter-btn">Pending</div><div class="filter-btn">In Progress</div><div class="filter-btn">Resolved</div>
+                        </div>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead><tr><th>#</th><th>Complaint ID</th><th>Description</th><th>Reported By</th><th>Date Submitted</th><th>Status</th><th>Actions</th></tr></thead>
+                            <tbody>
+                                <tr>
+                                    <td style="color:var(--gray-400);font-size:12px;">1</td><td><span class="id-label">C-006</span></td>
+                                    <td style="max-width:200px;"><div style="font-weight:500;color:var(--gray-800);">Pipe leakage in kitchen</div><div style="font-size:11px;color:var(--gray-400);">Causing water damage to floor</div></td>
+                                    <td><div style="font-weight:600;font-size:12px;color:var(--purple-700);">Nurul Aina</div><div style="font-size:10px;color:var(--gray-400);">T-002 | H-004</div></td>
+                                    <td style="font-size:12px;color:var(--gray-500);">20 May 2025</td><td><span class="badge badge-red">Pending</span></td>
+                                    <td><div class="actions-cell"><button class="topbar-btn btn-green btn-sm">Resolve</button><button class="topbar-btn btn-warning btn-sm">Edit</button><button class="topbar-btn btn-danger btn-sm">Delete</button></div></td>
+                                </tr>
+                                <tr>
+                                    <td style="color:var(--gray-400);font-size:12px;">2</td><td><span class="id-label">C-007</span></td>
+                                    <td style="max-width:200px;"><div style="font-weight:500;color:var(--gray-800);">Broken window lock</div><div style="font-size:11px;color:var(--gray-400);">Room 2 cannot be locked properly</div></td>
+                                    <td><div style="font-weight:600;font-size:12px;color:var(--purple-700);">Ahmad Zaki</div><div style="font-size:10px;color:var(--gray-400);">T-001 | H-002</div></td>
+                                    <td style="font-size:12px;color:var(--gray-500);">19 May 2025</td><td><span class="badge badge-yellow">In Progress</span></td>
+                                    <td><div class="actions-cell"><button class="topbar-btn btn-green btn-sm">Resolve</button><button class="topbar-btn btn-warning btn-sm">Edit</button><button class="topbar-btn btn-danger btn-sm">Delete</button></div></td>
+                                </tr>
+                                <tr>
+                                    <td style="color:var(--gray-400);font-size:12px;">3</td><td><span class="id-label">C-008</span></td>
+                                    <td style="max-width:200px;"><div style="font-weight:500;color:var(--gray-800);">Electricity tripping</div><div style="font-size:11px;color:var(--gray-400);">Main switch trips every night</div></td>
+                                    <td><div style="font-weight:600;font-size:12px;color:var(--purple-700);">Lim Wei Jian</div><div style="font-size:10px;color:var(--gray-400);">T-003 | H-006</div></td>
+                                    <td style="font-size:12px;color:var(--gray-500);">18 May 2025</td><td><span class="badge badge-green">Resolved</span></td>
+                                    <td><div class="actions-cell"><button class="topbar-btn btn-outline btn-sm">View</button><button class="topbar-btn btn-warning btn-sm">Edit</button><button class="topbar-btn btn-danger btn-sm">Delete</button></div></td>
+                                </tr>
+                                <tr>
+                                    <td style="color:var(--gray-400);font-size:12px;">4</td><td><span class="id-label">C-009</span></td>
+                                    <td style="max-width:200px;"><div style="font-weight:500;color:var(--gray-800);">Roof leakage during rain</div><div style="font-size:11px;color:var(--gray-400);">Ceiling of master bedroom is dripping</div></td>
+                                    <td><div style="font-weight:600;font-size:12px;color:var(--purple-700);">Siti Rahmah</div><div style="font-size:10px;color:var(--gray-400);">T-004 | H-008</div></td>
+                                    <td style="font-size:12px;color:var(--gray-500);">17 May 2025</td><td><span class="badge badge-red">Pending</span></td>
+                                    <td><div class="actions-cell"><button class="topbar-btn btn-green btn-sm">Resolve</button><button class="topbar-btn btn-warning btn-sm">Edit</button><button class="topbar-btn btn-danger btn-sm">Delete</button></div></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-footer">
+                        <div class="table-info">Showing 1 - 4 of 10 records</div>
+                        <div class="pagination">
+                            <div class="pg-btn"><svg viewBox="0 0 24 24" width="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></div>
+                            <div class="pg-btn pg-num active">1</div><div class="pg-btn pg-num">2</div><div class="pg-btn pg-num">3</div>
+                            <div class="pg-btn"><svg viewBox="0 0 24 24" width="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     PAGE 6 — SETTINGS
+     ════════════════════════════════════════════ -->
+<div id="page-settings" class="page">
+    <div class="app-layout">
+        <% request.setAttribute("activePage", "settings"); %>
+        <jsp:include page="includes/sidebar.jsp" />
+
+        <div class="main-content">
+            <div class="topbar">
+                <div class="topbar-left">
+                    <h2>Settings</h2>
+                    <p>Manage your account and system preferences</p>
+                </div>
+            </div>
+            <div class="page-body">
+                <!-- Change Password -->
+                <div class="section-divider"><h3>Account</h3><div class="section-divider-line"></div></div>
+                <div class="card" style="margin-bottom:24px;">
+                    <div class="card-header">
+                        <div class="card-title"><div class="card-title-dot"></div>Change Password</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Current Password</label>
+                                <input class="form-input" type="password" id="settings-current-pwd" placeholder="Enter current password"/>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">New Password</label>
+                                <input class="form-input" type="password" id="settings-new-pwd" placeholder="Enter new password"/>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Confirm New Password</label>
+                                <input class="form-input" type="password" id="settings-confirm-pwd" placeholder="Confirm new password"/>
+                            </div>
+                        </div>
+                        <div id="settings-msg" style="font-size:13px;font-weight:600;margin-top:8px;"></div>
+                        <div class="form-actions" style="margin-top:12px;">
+                            <button class="topbar-btn btn-green" onclick="changePassword()">
+                                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline;vertical-align:middle;margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg>
+                                Update Password
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Info -->
+                <div class="section-divider"><h3>System</h3><div class="section-divider-line"></div></div>
+                <div class="card">
+                    <div class="card-header"><div class="card-title"><div class="card-title-dot"></div>About</div></div>
+                    <div class="card-body">
+                        <table>
+                            <tbody>
+                                <tr><td style="padding:8px 12px;font-weight:600;color:var(--gray-600);width:180px;">Application</td><td style="padding:8px 12px;">Student Rental House Management System</td></tr>
+                                <tr><td style="padding:8px 12px;font-weight:600;color:var(--gray-600);">Version</td><td style="padding:8px 12px;">1.0.0</td></tr>
+                                <tr><td style="padding:8px 12px;font-weight:600;color:var(--gray-600);">Course</td><td style="padding:8px 12px;">CSM3023 — Web Application Development</td></tr>
+                                <tr><td style="padding:8px 12px;font-weight:600;color:var(--gray-600);">University</td><td style="padding:8px 12px;">Universiti Malaysia Terengganu (UMT)</td></tr>
+                                <tr><td style="padding:8px 12px;font-weight:600;color:var(--gray-600);">Technology</td><td style="padding:8px 12px;">Java JSP / Servlet + MySQL + Tomcat</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script src="script.js"></script>
+</body>
+</html>

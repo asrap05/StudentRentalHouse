@@ -1,0 +1,15 @@
+# Build output
+/build/
+/dist/
+
+# NetBeans private config (user-specific paths, server settings)
+/nbproject/private/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
