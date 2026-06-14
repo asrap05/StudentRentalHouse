@@ -6,8 +6,8 @@
 // ═══ USER STORE (in-memory, survives page switches) ═══
 
 var userStore = {
-    admin: { password: 'admin123', name: 'Admin User', role: 'Administrator', avatar: 'AD' },
-    staff: { password: 'staff123', name: 'Staff User', role: 'Staff', avatar: 'ST' },
+    admin: { password: localStorage.getItem('pwd_admin') || 'admin123', name: 'Admin User', role: 'Administrator', avatar: 'AD' },
+    staff: { password: localStorage.getItem('pwd_staff') || 'staff123', name: 'Staff User', role: 'Staff', avatar: 'ST' },
     currentUser: null
 };
 
@@ -524,6 +524,7 @@ function changePassword() {
     if (!nw.value.trim() || nw.value.length < 4) { msg.style.display = 'block'; msg.style.background = '#fee2e2'; msg.style.color = '#dc2626'; msg.textContent = '✗ New password must be at least 4 characters.'; return; }
     if (nw.value !== cf.value) { msg.style.display = 'block'; msg.style.background = '#fee2e2'; msg.style.color = '#dc2626'; msg.textContent = '✗ Passwords do not match.'; return; }
     userStore[username].password = nw.value;
+    localStorage.setItem('pwd_' + username, nw.value);
     msg.style.display = 'block'; msg.style.background = '#dcfce7'; msg.style.color = '#16a34a';
     msg.textContent = '✓ Password updated! Use the new password on next login.';
     cur.value = ''; nw.value = ''; cf.value = '';
