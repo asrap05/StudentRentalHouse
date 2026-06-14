@@ -256,7 +256,7 @@
             <div class="topbar"><div class="topbar-left"><h2>Tenant Management</h2><p>Register and manage all tenant information</p></div><div class="topbar-right"><button class="topbar-btn btn-green">+ Register Tenant</button></div></div>
             <div class="page-body">
                 <div class="section-divider"><h3>Register / Edit Tenant</h3><div class="section-divider-line"></div></div>
-                <div class="card" style="margin-bottom:24px;"><div class="card-header"><div class="card-title"><div class="card-title-dot"></div>Tenant Form <span class="anno">TenantServlet &rarr; doPost()</span></div><span class="badge badge-green">Add New</span></div>
+                <div class="card" id="tenant-form-card" style="margin-bottom:24px;"><div class="card-header"><div class="card-title"><div class="card-title-dot"></div>Tenant Form <span class="anno">TenantServlet &rarr; doPost()</span></div><span class="badge badge-green">Add New</span></div>
                     <div class="card-body"><div class="form-grid">
                         <div class="form-group"><label class="form-label">Tenant ID <span class="req">*</span></label><input class="form-input" type="text" placeholder="Auto-generated (e.g. T-009)" disabled style="background:var(--gray-50);color:var(--gray-400);"/></div>
                         <div class="form-group"><label class="form-label">Full Name <span class="req">*</span></label><input id="tenant-name" class="form-input" type="text" placeholder="e.g. Muhammad Ali bin Hassan"/></div>
@@ -306,7 +306,7 @@
                 </div>
 
                 <div class="section-divider"><h3>Submit / Edit Complaint</h3><div class="section-divider-line"></div></div>
-                <div class="card" style="margin-bottom:24px;"><div class="card-header"><div class="card-title"><div class="card-title-dot"></div>Complaint Form <span class="anno">ComplaintServlet &rarr; doPost()</span></div><span class="badge badge-green">Add New</span></div>
+                <div class="card" id="complaint-form-card" style="margin-bottom:24px;"><div class="card-header"><div class="card-title"><div class="card-title-dot"></div>Complaint Form <span class="anno">ComplaintServlet &rarr; doPost()</span></div><span class="badge badge-green">Add New</span></div>
                     <div class="card-body"><div class="form-grid">
                         <div class="form-group"><label class="form-label">Complaint ID</label><input class="form-input" type="text" placeholder="Auto-generated (e.g. C-011)" disabled style="background:var(--gray-50);color:var(--gray-400);"/></div>
                         <div class="form-group"><label class="form-label">Complaint Date <span class="req">*</span></label><input id="complaint-date" class="form-input" type="date" value="2025-05-21"/></div>

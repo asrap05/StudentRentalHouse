@@ -363,21 +363,44 @@ document.addEventListener('click', function(e) {
             matric = document.getElementById('tenant-matric'), house = document.getElementById('tenant-house'),
             date = document.getElementById('tenant-date');
         if (!name || !phone || !name.value.trim() || !phone.value.trim()) { showToast('Please fill Name and Phone', 'error'); return; }
-        var table = document.querySelector('#page-tenant table tbody'); if (!table) return;
-        var count = table.querySelectorAll('tr').length + 1, id = 'T-' + String(count).padStart(3, '0');
-        var dispDate = date && date.value ? new Date(date.value + 'T00:00:00').toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '-';
         var houseVal = house ? house.value : '';
-        var row = table.insertRow();
-        row.innerHTML = '<td style="color:var(--gray-400);font-size:12px;">' + count + '</td>' +
-            '<td><span class="id-label">' + id + '</span></td>' +
-            '<td style="font-weight:600;color:var(--gray-800);">' + name.value.trim() + '</td>' +
-            '<td>' + phone.value.trim() + '</td>' +
-            '<td style="font-size:11px;color:var(--gray-400);">' + (matric ? matric.value.trim() || '-' : '-') + '</td>' +
-            '<td><span class="badge badge-purple">' + (houseVal.split('|')[0] || houseVal || '-') + '</span></td>' +
-            '<td style="font-size:12px;color:var(--gray-500);">' + dispDate + '</td>' +
-            '<td><div class="actions-cell"><button class="topbar-btn btn-warning btn-sm">Edit</button><button class="topbar-btn btn-danger btn-sm">Delete</button></div></td>';
-        updateFooter(table); updateDashboardStats();
-        showToast(id + ' saved!', 'success');
+        var dispDate = date && date.value ? new Date(date.value + 'T00:00:00').toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '-';
+
+        var formCard = document.getElementById('tenant-form-card');
+        var editId = formCard ? formCard.getAttribute('data-editing-id') : null;
+
+        if (editId) {
+            document.querySelectorAll('#page-tenant table tbody tr').forEach(function(r) {
+                var lbl = r.querySelector('.id-label');
+                if (lbl && lbl.textContent.trim() === editId) {
+                    var cells = r.querySelectorAll('td');
+                    cells[2].textContent = name.value.trim();
+                    cells[2].style.cssText = 'font-weight:600;color:var(--gray-800);';
+                    cells[3].textContent = phone.value.trim();
+                    cells[4].textContent = matric ? matric.value.trim() || '-' : '-';
+                    cells[5].innerHTML = '<span class="badge badge-purple">' + (houseVal.split('|')[0] || houseVal || '-') + '</span>';
+                    cells[6].textContent = dispDate;
+                }
+            });
+            formCard.removeAttribute('data-editing-id');
+            var bdg = formCard.querySelector('.badge');
+            if (bdg) { bdg.textContent = 'Add New'; bdg.className = 'badge badge-green'; }
+            showToast(editId + ' updated!', 'success');
+        } else {
+            var table = document.querySelector('#page-tenant table tbody'); if (!table) return;
+            var count = table.querySelectorAll('tr').length + 1, id = 'T-' + String(count).padStart(3, '0');
+            var row = table.insertRow();
+            row.innerHTML = '<td style="color:var(--gray-400);font-size:12px;">' + count + '</td>' +
+                '<td><span class="id-label">' + id + '</span></td>' +
+                '<td style="font-weight:600;color:var(--gray-800);">' + name.value.trim() + '</td>' +
+                '<td>' + phone.value.trim() + '</td>' +
+                '<td style="font-size:11px;color:var(--gray-400);">' + (matric ? matric.value.trim() || '-' : '-') + '</td>' +
+                '<td><span class="badge badge-purple">' + (houseVal.split('|')[0] || houseVal || '-') + '</span></td>' +
+                '<td style="font-size:12px;color:var(--gray-500);">' + dispDate + '</td>' +
+                '<td><div class="actions-cell"><button class="topbar-btn btn-warning btn-sm">Edit</button><button class="topbar-btn btn-danger btn-sm">Delete</button></div></td>';
+            showToast(id + ' saved!', 'success');
+        }
+        updateFooter(document.querySelector('#page-tenant table')); updateDashboardStats();
         name.value = ''; phone.value = ''; if (matric) matric.value = '';
 
     } else if (text === 'Submit Complaint') {
@@ -385,24 +408,45 @@ document.addEventListener('click', function(e) {
         var desc = document.getElementById('complaint-desc'), tenant = document.getElementById('complaint-tenant'),
             status = document.getElementById('complaint-status'), date = document.getElementById('complaint-date');
         if (!desc || !desc.value.trim()) { showToast('Please fill the description', 'error'); return; }
-        var table = document.querySelector('#page-complaint table tbody'); if (!table) return;
-        var count = table.querySelectorAll('tr').length + 1, id = 'C-' + String(count).padStart(3, '0');
         var tenantVal = tenant ? tenant.value : '';
         var tenantName = tenantVal.split('|')[1] ? tenantVal.split('|')[1].trim() : (tenantVal || '-');
         var tenantInfo = tenantVal.split('|')[0] ? tenantVal.split('|')[0].trim() : '';
-        var dispDate = date && date.value ? new Date(date.value + 'T00:00:00').toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '-';
         var stVal = status ? status.value : 'Pending';
         var stClass = stVal === 'Pending' ? 'badge-red' : stVal === 'In Progress' ? 'badge-yellow' : 'badge-green';
-        var row = table.insertRow();
-        row.innerHTML = '<td style="color:var(--gray-400);font-size:12px;">' + count + '</td>' +
-            '<td><span class="id-label">' + id + '</span></td>' +
-            '<td style="max-width:200px;"><div style="font-weight:500;color:var(--gray-800);">' + desc.value.trim() + '</div><div style="font-size:11px;color:var(--gray-400);">New submission</div></td>' +
-            '<td><div style="font-weight:600;font-size:12px;color:var(--purple-700);">' + tenantName + '</div><div style="font-size:10px;color:var(--gray-400);">' + tenantInfo + '</div></td>' +
-            '<td style="font-size:12px;color:var(--gray-500);">' + dispDate + '</td>' +
-            '<td><span class="badge ' + stClass + '">' + stVal + '</span></td>' +
-            '<td><div class="actions-cell"><button class="topbar-btn btn-green btn-sm">Resolve</button><button class="topbar-btn btn-warning btn-sm">Edit</button><button class="topbar-btn btn-danger btn-sm">Delete</button></div></td>';
-        updateFooter(table); updateDashboardStats();
-        showToast(id + ' submitted!', 'success');
+        var dispDate = date && date.value ? new Date(date.value + 'T00:00:00').toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '-';
+
+        var formCard = document.getElementById('complaint-form-card');
+        var editId = formCard ? formCard.getAttribute('data-editing-id') : null;
+
+        if (editId) {
+            document.querySelectorAll('#page-complaint table tbody tr').forEach(function(r) {
+                var lbl = r.querySelector('.id-label');
+                if (lbl && lbl.textContent.trim() === editId) {
+                    var cells = r.querySelectorAll('td');
+                    cells[2].innerHTML = '<div style="font-weight:500;color:var(--gray-800);">' + desc.value.trim() + '</div><div style="font-size:11px;color:var(--gray-400);">Updated</div>';
+                    cells[3].innerHTML = '<div style="font-weight:600;font-size:12px;color:var(--purple-700);">' + tenantName + '</div><div style="font-size:10px;color:var(--gray-400);">' + tenantInfo + '</div>';
+                    cells[4].textContent = dispDate;
+                    cells[5].innerHTML = '<span class="badge ' + stClass + '">' + stVal + '</span>';
+                }
+            });
+            formCard.removeAttribute('data-editing-id');
+            var bdg = formCard.querySelector('.badge');
+            if (bdg) { bdg.textContent = 'Add New'; bdg.className = 'badge badge-green'; }
+            showToast(editId + ' updated!', 'success');
+        } else {
+            var table = document.querySelector('#page-complaint table tbody'); if (!table) return;
+            var count = table.querySelectorAll('tr').length + 1, id = 'C-' + String(count).padStart(3, '0');
+            var row = table.insertRow();
+            row.innerHTML = '<td style="color:var(--gray-400);font-size:12px;">' + count + '</td>' +
+                '<td><span class="id-label">' + id + '</span></td>' +
+                '<td style="max-width:200px;"><div style="font-weight:500;color:var(--gray-800);">' + desc.value.trim() + '</div><div style="font-size:11px;color:var(--gray-400);">New submission</div></td>' +
+                '<td><div style="font-weight:600;font-size:12px;color:var(--purple-700);">' + tenantName + '</div><div style="font-size:10px;color:var(--gray-400);">' + tenantInfo + '</div></td>' +
+                '<td style="font-size:12px;color:var(--gray-500);">' + dispDate + '</td>' +
+                '<td><span class="badge ' + stClass + '">' + stVal + '</span></td>' +
+                '<td><div class="actions-cell"><button class="topbar-btn btn-green btn-sm">Resolve</button><button class="topbar-btn btn-warning btn-sm">Edit</button><button class="topbar-btn btn-danger btn-sm">Delete</button></div></td>';
+            showToast(id + ' submitted!', 'success');
+        }
+        updateFooter(document.querySelector('#page-complaint table')); updateDashboardStats();
         desc.value = '';
 
     } else if (text === 'Clear Form') {
