@@ -137,20 +137,35 @@ function updateFooter(table) {
 
 // ═══ FILTER ═══
 
+// Button-style filters (complaint page)
 document.addEventListener('click', function(e) {
     var btn = e.target.closest('.filter-btn'); if (!btn) return;
     var bar = btn.closest('.filter-bar'); if (!bar) return;
     bar.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
     btn.classList.add('active');
+    applyFilter(bar);
+});
+
+// Dropdown filters (house/tenant pages)
+document.addEventListener('change', function(e) {
+    var sel = e.target.closest('.filter-bar select'); if (!sel) return;
+    applyFilter(sel.closest('.filter-bar'));
+});
+
+function applyFilter(bar) {
     var table = bar.closest('.card').querySelector('table'); if (!table) return;
-    var filter = btn.textContent.trim();
+    var btnActive = bar.querySelector('.filter-btn.active');
+    var sel = bar.querySelector('select');
+    var filter = btnActive ? btnActive.textContent.trim() : (sel ? sel.value : '');
+    if (!filter || filter === 'All Status' || filter === 'All Houses') filter = '';
+
     table.querySelectorAll('tbody tr').forEach(function(row) {
-        if (filter === 'All') { row.style.display = ''; return; }
+        if (!filter) { row.style.display = ''; return; }
         var badge = row.querySelector('.badge');
         row.style.display = (badge && badge.textContent.trim() === filter) ? '' : 'none';
     });
     updateFooter(table);
-});
+}
 
 // ═══ SEARCH ═══
 
@@ -219,9 +234,59 @@ document.addEventListener('click', function(e) {
     if (btn.closest('.topbar') || btn.closest('.login-outer') || btn.closest('.sidebar') ||
         btn.closest('.quick-links') || btn.closest('.form-actions')) return;
     var text = btn.textContent.trim();
+
     if (text === 'Edit') {
-        var id = btn.closest('tr').querySelector('.id-label');
-        showToast(id ? id.textContent.trim() + ' — Edit mode' : 'Edit mode', 'warning');
+        var row = btn.closest('tr'); if (!row) return;
+        var idEl = row.querySelector('.id-label'); if (!idEl) return;
+        var id = idEl.textContent.trim();
+        var cells = row.querySelectorAll('td');
+
+        // Scroll to form on current page
+        var page = row.closest('[id^="page-"]');
+        if (page) {
+            var formCard = page.querySelector('.card[id$="-form-card"]') || page.querySelector('.card');
+            if (formCard) {
+                formCard.scrollIntoView({ behavior: 'smooth' });
+                formCard.setAttribute('data-editing-id', id);
+                // Change form badge
+                var badge = formCard.querySelector('.badge');
+                if (badge) { badge.textContent = 'Editing'; badge.className = 'badge badge-yellow'; }
+            }
+        }
+
+        if (id.charAt(0) === 'H') {
+            // House: cells[1]=id, [2]=location, [3]=price, [4]=rooms, [5]=status badge
+            var loc = document.getElementById('house-location');
+            var pr = document.getElementById('house-price');
+            var rm = document.getElementById('house-rooms');
+            var st = document.getElementById('house-status');
+            if (loc) loc.value = (cells[2] && cells[2].textContent.trim()) || '';
+            if (pr) pr.value = (cells[3] && cells[3].textContent.replace(/[^0-9]/g,'')) || '';
+            if (rm) rm.value = (cells[4] && cells[4].textContent.trim()) || '';
+            if (st) {
+                var stText = (cells[5] && cells[5].querySelector('.badge')) ? cells[5].querySelector('.badge').textContent.trim() : '';
+                for (var i=0; i<st.options.length; i++) if (st.options[i].text === stText) { st.selectedIndex = i; break; }
+            }
+        } else if (id.charAt(0) === 'T') {
+            var name = document.getElementById('tenant-name'), ph = document.getElementById('tenant-phone'),
+                mat = document.getElementById('tenant-matric'), hse = document.getElementById('tenant-house'),
+                dt = document.getElementById('tenant-date');
+            if (name) name.value = (cells[2] && cells[2].textContent.trim()) || '';
+            if (ph) ph.value = (cells[3] && cells[3].textContent.trim()) || '';
+            if (mat) mat.value = (cells[4] && cells[4].textContent.trim()) || '';
+            if (hse) { for (var j=0; j<hse.options.length; j++) if (hse.options[j].text.indexOf('H-')===0) { hse.selectedIndex = j; break; } }
+            if (dt) dt.value = '';
+        } else if (id.charAt(0) === 'C') {
+            var desc = document.getElementById('complaint-desc'), ten = document.getElementById('complaint-tenant'),
+                cst = document.getElementById('complaint-status'), cdt = document.getElementById('complaint-date');
+            if (desc) desc.value = (cells[2] && cells[2].querySelector('div')) ? cells[2].querySelector('div').textContent.trim() : '';
+            if (cdt) cdt.value = '';
+            if (cst) {
+                var st2 = (cells[5] && cells[5].querySelector('.badge')) ? cells[5].querySelector('.badge').textContent.trim() : '';
+                for (var k=0; k<cst.options.length; k++) if (cst.options[k].text === st2) { cst.selectedIndex = k; break; }
+            }
+        }
+        showToast(id + ' — edit mode', 'warning');
     } else if (text === 'Delete') {
         var row = btn.closest('tr'), idEl = row ? row.querySelector('.id-label') : null;
         if (confirm(idEl ? 'Delete ' + idEl.textContent.trim() + '?' : 'Delete record?')) {
@@ -249,19 +314,47 @@ document.addEventListener('click', function(e) {
         var loc = document.getElementById('house-location'), pr = document.getElementById('house-price'),
             rm = document.getElementById('house-rooms'), st = document.getElementById('house-status');
         if (!loc || !pr || !loc.value.trim() || !pr.value.trim()) { showToast('Please fill Location and Price', 'error'); return; }
-        var table = document.querySelector('#page-house table tbody'); if (!table) return;
-        var count = table.querySelectorAll('tr').length + 1, id = 'H-' + String(count).padStart(3, '0');
         var statusVal = st ? st.value : 'Available';
         var badgeClass = statusVal === 'Available' ? 'badge-green' : statusVal === 'Occupied' ? 'badge-purple' : 'badge-yellow';
-        var row = table.insertRow();
-        row.innerHTML = '<td style="color:var(--gray-400);font-size:12px;">' + count + '</td>' +
-            '<td><span class="id-label">' + id + '</span></td><td>' + loc.value.trim() + '</td>' +
-            '<td style="font-weight:600;color:var(--green-700);">RM ' + pr.value.trim() + '</td>' +
-            '<td>' + (rm ? rm.value : '-') + '</td>' +
-            '<td><span class="badge ' + badgeClass + '">' + statusVal + '</span></td>' +
-            '<td><div class="actions-cell"><button class="topbar-btn btn-warning btn-sm">Edit</button><button class="topbar-btn btn-danger btn-sm">Delete</button></div></td>';
-        updateFooter(table); updateDashboardStats();
-        showToast(id + ' saved!', 'success');
+
+        // Check if editing existing row
+        var formCard = document.getElementById('house-form-card');
+        var editId = formCard ? formCard.getAttribute('data-editing-id') : null;
+
+        if (editId) {
+            // Update existing row
+            var row = document.querySelector('#page-house tbody tr:has(.id-label)');
+            var allRows = document.querySelectorAll('#page-house table tbody tr');
+            allRows.forEach(function(r) {
+                var lbl = r.querySelector('.id-label');
+                if (lbl && lbl.textContent.trim() === editId) {
+                    var cells = r.querySelectorAll('td');
+                    cells[2].textContent = loc.value.trim();
+                    cells[3].innerHTML = 'RM ' + pr.value.trim();
+                    cells[3].style.cssText = 'font-weight:600;color:var(--green-700);';
+                    cells[4].textContent = rm ? rm.value : '-';
+                    cells[5].innerHTML = '<span class="badge ' + badgeClass + '">' + statusVal + '</span>';
+                }
+            });
+            formCard.removeAttribute('data-editing-id');
+            var badge = formCard.querySelector('.badge');
+            if (badge) { badge.textContent = 'Add New'; badge.className = 'badge badge-green'; }
+            showToast(editId + ' updated!', 'success');
+        } else {
+            // Create new row
+            var table = document.querySelector('#page-house table tbody'); if (!table) return;
+            var count = table.querySelectorAll('tr').length + 1;
+            var id = 'H-' + String(count).padStart(3, '0');
+            var newRow = table.insertRow();
+            newRow.innerHTML = '<td style="color:var(--gray-400);font-size:12px;">' + count + '</td>' +
+                '<td><span class="id-label">' + id + '</span></td><td>' + loc.value.trim() + '</td>' +
+                '<td style="font-weight:600;color:var(--green-700);">RM ' + pr.value.trim() + '</td>' +
+                '<td>' + (rm ? rm.value : '-') + '</td>' +
+                '<td><span class="badge ' + badgeClass + '">' + statusVal + '</span></td>' +
+                '<td><div class="actions-cell"><button class="topbar-btn btn-warning btn-sm">Edit</button><button class="topbar-btn btn-danger btn-sm">Delete</button></div></td>';
+            showToast(id + ' saved!', 'success');
+        }
+        updateFooter(document.querySelector('#page-house table')); updateDashboardStats();
         loc.value = ''; pr.value = ''; if (rm) rm.value = '';
 
     } else if (text === 'Save Tenant') {
