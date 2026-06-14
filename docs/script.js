@@ -112,6 +112,8 @@ function switchPageByName(name) {
     document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
     var page = document.getElementById('page-' + name);
     if (page) page.classList.add('active');
+    // Update stats when switching to dashboard
+    if (name === 'dashboard') updateDashboardStats();
     // Clear any lingering edit state
     document.querySelectorAll('[data-editing-id]').forEach(function(el) {
         el.removeAttribute('data-editing-id');
@@ -524,4 +526,9 @@ document.addEventListener('click', function(e) {
     if (!link) return;
     e.preventDefault();
     showToast('Password reset link sent to admin email (demo)', 'info');
+});
+
+// ═══ INIT: Update stats on first load ═══
+document.addEventListener('DOMContentLoaded', function() {
+    updateDashboardStats();
 });
