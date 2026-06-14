@@ -38,7 +38,10 @@ function updateSidebar(name, role, avatar) {
 // ═══ DASHBOARD STATS ═══
 
 function updateDashboardStats() {
-    var houseRows = document.querySelectorAll('#page-house table tbody tr');
+    // Count only visible rows (exclude filtered/hidden)
+    var allHouseRows = document.querySelectorAll('#page-house table tbody tr');
+    var houseRows = [];
+    allHouseRows.forEach(function(r) { if (r.style.display !== 'none') houseRows.push(r); });
     var totalHouses = houseRows.length, occupied = 0, vacant = 0, maint = 0, occupiedRent = 0;
 
     houseRows.forEach(function(r) {
@@ -53,8 +56,13 @@ function updateDashboardStats() {
         }
     });
 
-    var tenantCount = document.querySelectorAll('#page-tenant table tbody tr').length;
-    var complaintRows = document.querySelectorAll('#page-complaint table tbody tr');
+    var allTenantRows = document.querySelectorAll('#page-tenant table tbody tr');
+    var tenantCount = 0;
+    allTenantRows.forEach(function(r) { if (r.style.display !== 'none') tenantCount++; });
+
+    var allCompRows = document.querySelectorAll('#page-complaint table tbody tr');
+    var complaintRows = [];
+    allCompRows.forEach(function(r) { if (r.style.display !== 'none') complaintRows.push(r); });
     var openComplaints = 0;
     complaintRows.forEach(function(r) {
         var b = r.querySelector('.badge');
