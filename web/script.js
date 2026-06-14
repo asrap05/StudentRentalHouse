@@ -167,18 +167,34 @@ document.addEventListener('input', function(e) {
 // ═══ PAGINATION ═══
 
 document.addEventListener('click', function(e) {
-    var pg = e.target.closest('.pg-btn'); if (!pg || pg.classList.contains('active')) return;
+    var pg = e.target.closest('.pg-btn'); if (!pg) return;
     var pag = pg.closest('.pagination'); if (!pag) return;
+
+    var text = pg.textContent.trim();
+    if (!text) {
+        // Arrow button — find current page and navigate
+        var btns = Array.from(pag.querySelectorAll('.pg-btn')).filter(function(b) { return b.textContent.trim(); });
+        var active = pag.querySelector('.pg-btn.active');
+        var idx = btns.indexOf(active);
+        if (idx < 0) idx = 0;
+
+        // < arrow: points="15 18 9 12 15 6" (left-pointing)
+        var svg = pg.querySelector('svg');
+        var isLeft = svg && svg.innerHTML.indexOf('15 18') >= 0;
+        idx = isLeft ? Math.max(0, idx - 1) : Math.min(btns.length - 1, idx + 1);
+        btns[idx].click();
+        return;
+    }
+
+    // Number button
+    if (pg.classList.contains('active')) return;
     pag.querySelectorAll('.pg-btn').forEach(function(b){b.classList.remove('active');});
     pg.classList.add('active');
     var table = pag.closest('.card').querySelector('table'); if (!table) return;
-    var pageNum = parseInt(pg.textContent.trim()) || 1, perPage = 5;
-    var visible = getVisibleRows(table);
-    if (visible.length === table.querySelectorAll('tbody tr').length) visible = Array.from(table.querySelectorAll('tbody tr'));
+    var pageNum = parseInt(text) || 1, perPage = 5;
+    var allRows = Array.from(table.querySelectorAll('tbody tr'));
     var start = (pageNum-1)*perPage, end = start+perPage;
-    table.querySelectorAll('tbody tr').forEach(function(row,i) {
-        row.style.display = (i >= start && i < end) ? '' : 'none';
-    });
+    allRows.forEach(function(r,i) { r.style.display = (i >= start && i < end) ? '' : 'none'; });
     updateFooter(table);
 });
 

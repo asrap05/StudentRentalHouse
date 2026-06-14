@@ -54,7 +54,7 @@
         <div class="sidebar-user">
             <div class="sidebar-avatar" id="sidebar-avatar">AD</div>
             <div>
-                <div class="sidebar-user-name" id="sidebar-name">Admin User</div>
+                <div class="sidebar-user-name" id="sidebar-username">Admin User</div>
                 <div class="sidebar-user-role" id="sidebar-role">Administrator</div>
             </div>
         </div>

@@ -301,7 +301,7 @@
                             </div>
                             <div class="form-group">
                                 <label class="form-label">House Status <span class="req">*</span></label>
-                                <select class="form-select">
+                                <select id="house-status" class="form-select">
                                     <option value="">-- Select Status --</option>
                                     <option value="available" selected>Available</option>
                                     <option value="occupied">Occupied</option>
@@ -310,15 +310,15 @@
                             </div>
                             <div class="form-group form-full">
                                 <label class="form-label">Location / Address <span class="req">*</span></label>
-                                <input class="form-input" type="text" placeholder="e.g. No. 14, Jalan Universiti, 43600 Bangi, Selangor"/>
+                                <input id="house-location" class="form-input" type="text" placeholder="e.g. No. 14, Jalan Universiti, Bangi"/>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Monthly Rental Price (RM) <span class="req">*</span></label>
-                                <input class="form-input" type="number" placeholder="e.g. 850"/>
+                                <input id="house-price" class="form-input" type="number" placeholder="e.g. 850"/>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Number of Rooms</label>
-                                <input class="form-input" type="number" placeholder="e.g. 3"/>
+                                ><input id="house-rooms" class="form-input" type="number" placeholder="e.g. 3"/>
                             </div>
                         </div>
                         <div class="form-actions" style="margin-top:16px;">
@@ -396,11 +396,11 @@
                     <div class="card-body">
                         <div class="form-grid">
                             <div class="form-group"><label class="form-label">Tenant ID <span class="req">*</span></label><input class="form-input" type="text" placeholder="Auto-generated (e.g. T-009)" disabled style="background:var(--gray-50);color:var(--gray-400);"/></div>
-                            <div class="form-group"><label class="form-label">Full Name <span class="req">*</span></label><input class="form-input" type="text" placeholder="e.g. Muhammad Ali bin Hassan"/></div>
-                            <div class="form-group"><label class="form-label">Phone Number <span class="req">*</span></label><input class="form-input" type="tel" placeholder="e.g. 012-345 6789"/></div>
-                            <div class="form-group"><label class="form-label">Student ID / Matric No.</label><input class="form-input" type="text" placeholder="e.g. A21EC0001"/></div>
+                            <div class="form-group"><label class="form-label">Full Name <span class="req">*</span></label><input id="tenant-name" class="form-input" type="text" placeholder="e.g. Muhammad Ali bin Hassan"/></div>
+                            <div class="form-group"><label class="form-label">Phone Number <span class="req">*</span></label><input id="tenant-phone" class="form-input" type="tel" placeholder="e.g. 012-345 6789"/></div>
+                            <div class="form-group"><label class="form-label">Student ID / Matric No.</label><input id="tenant-matric" class="form-input" type="text" placeholder="e.g. A21EC0001"/></div>
                             <div class="form-group"><label class="form-label">Assigned House <span class="req">*</span> <span style="font-size:10px;color:var(--green-600);font-weight:500;">[FK: house_id]</span></label><select class="form-select"><option value="">-- Select Available House --</option><option>H-001 | Jalan Universiti 12 | RM 800</option><option>H-005 | Sri Mawar Apt, Nilai | RM 750</option><option>H-007 | Taman Ilmu Blk A | RM 900</option><option>H-009 | Lorong Ilmu 3 | RM 850</option></select></div>
-                            <div class="form-group"><label class="form-label">Move-in Date</label><input class="form-input" type="date" value="2025-05-20"/></div>
+                            <div class="form-group"><label class="form-label">Move-in Date</label>><input id="tenant-date" class="form-input" type="date" value="2025-05-20"/></div>
                             <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" type="email" placeholder="e.g. student@siswa.ukm.edu.my"/></div>
                             <div class="form-group"><label class="form-label">Gender</label><select class="form-select"><option>-- Select Gender --</option><option>Male</option><option>Female</option></select></div>
                         </div>
@@ -486,10 +486,10 @@
                     <div class="card-body">
                         <div class="form-grid">
                             <div class="form-group"><label class="form-label">Complaint ID</label><input class="form-input" type="text" placeholder="Auto-generated (e.g. C-011)" disabled style="background:var(--gray-50);color:var(--gray-400);"/></div>
-                            <div class="form-group"><label class="form-label">Complaint Date <span class="req">*</span></label><input class="form-input" type="date" value="2025-05-21"/></div>
+                            <div class="form-group"><label class="form-label">Complaint Date <span class="req">*</span></label>><input id="complaint-date" class="form-input" type="date" value="2025-05-21"/></div>
                             <div class="form-group"><label class="form-label">Reported By (Tenant) <span class="req">*</span> <span style="font-size:10px;color:var(--green-600);font-weight:500;">[FK: tenant_id]</span></label><select class="form-select"><option value="">-- Select Tenant --</option><option>T-001 | Ahmad Zaki Ibrahim | H-002</option><option>T-002 | Nurul Aina Mohd Noor | H-004</option><option>T-003 | Lim Wei Jian | H-006</option><option>T-004 | Siti Rahmah Yusof | H-008</option></select></div>
-                            <div class="form-group"><label class="form-label">Complaint Status <span class="req">*</span></label><select class="form-select"><option>Pending</option><option>In Progress</option><option>Resolved</option></select></div>
-                            <div class="form-group form-full"><label class="form-label">Complaint Description <span class="req">*</span></label><textarea class="form-textarea" placeholder="Describe the issue in detail..."></textarea></div>
+                            <div class="form-group"><label class="form-label">Complaint Status <span class="req">*</span></label><select id="complaint-tenant" class="form-select"><option>Pending</option><option>In Progress</option><option>Resolved</option></select></div>
+                            <div class="form-group form-full"><label class="form-label">Complaint Description <span class="req">*</span></label><textarea id="complaint-desc" class="form-textarea" placeholder="Describe the issue in detail..."></textarea></div>
                         </div>
                         <div class="form-actions" style="margin-top:16px;">
                             <button class="topbar-btn btn-green" onclick="saveRecord('complaint')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline;vertical-align:middle;margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg>Submit Complaint</button>
