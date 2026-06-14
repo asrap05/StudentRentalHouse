@@ -38,59 +38,49 @@ function updateSidebar(name, role, avatar) {
 // ═══ DASHBOARD STATS ═══
 
 function updateDashboardStats() {
-    // Count houses
     var houseRows = document.querySelectorAll('#page-house table tbody tr');
-    var totalHouses = houseRows.length;
-    var occupied = 0, vacant = 0, maint = 0, totalRent = 0, occupiedRent = 0;
+    var totalHouses = houseRows.length, occupied = 0, vacant = 0, maint = 0, occupiedRent = 0;
+
     houseRows.forEach(function(r) {
         var badge = r.querySelector('.badge');
-        var priceCell = r.querySelectorAll('td')[3];
-        var price = priceCell ? parseFloat(priceCell.textContent.replace('RM','').trim()) : 0;
-        totalRent += price;
+        var cells = r.querySelectorAll('td');
+        var price = cells[3] ? parseFloat((cells[3].textContent || '').replace(/[^0-9]/g,'')) || 0 : 0;
         if (badge) {
             var st = badge.textContent.trim();
             if (st === 'Occupied') { occupied++; occupiedRent += price; }
             else if (st === 'Available') vacant++;
-            else if (st === 'Maintenance' || st === 'Under Maintenance') maint++;
+            else maint++;
         }
     });
 
-    // Count tenants
     var tenantCount = document.querySelectorAll('#page-tenant table tbody tr').length;
-
-    // Count open complaints (Pending + In Progress)
     var complaintRows = document.querySelectorAll('#page-complaint table tbody tr');
     var openComplaints = 0;
     complaintRows.forEach(function(r) {
-        var badge = r.querySelector('.badge');
-        if (badge && (badge.textContent.trim() === 'Pending' || badge.textContent.trim() === 'In Progress')) openComplaints++;
+        var b = r.querySelector('.badge');
+        if (b && (b.textContent.trim() === 'Pending' || b.textContent.trim() === 'In Progress')) openComplaints++;
     });
 
-    // Update stat cards
-    var stats = document.querySelectorAll('#page-dashboard .stat-value');
-    if (stats[0]) stats[0].textContent = totalHouses;
-    if (stats[1]) stats[1].textContent = tenantCount;
-    if (stats[2]) stats[2].textContent = openComplaints;
-    if (stats[3]) stats[3].textContent = vacant;
+    // Stat cards
+    var st = function(id, v) { var e = document.getElementById(id); if (e) e.textContent = v; };
+    st('stat-total-houses', totalHouses);
+    st('stat-active-tenants', tenantCount);
+    st('stat-open-complaints', openComplaints);
+    st('stat-vacant-houses', vacant);
 
-    // Update occupancy overview
-    var occBar = document.querySelector('#page-dashboard .card-body [style*="flex-direction:column"]');
-    if (occBar && totalHouses > 0) {
-        var rows2 = occBar.querySelectorAll('[style*="display:flex;justify-content:space-between"]');
-        if (rows2[0]) rows2[0].querySelectorAll('span')[1].textContent = occupied + ' / ' + totalHouses;
-        if (rows2[1]) rows2[1].querySelectorAll('span')[1].textContent = vacant + ' / ' + totalHouses;
-        if (rows2[2]) rows2[2].querySelectorAll('span')[1].textContent = maint + ' / ' + totalHouses;
-        var bars = occBar.querySelectorAll('[style*="border-radius:20px"][style*="height:10px"] [style*="width:"]');
-        if (bars[0]) bars[0].style.width = (occupied/totalHouses*100) + '%';
-        if (bars[1]) bars[1].style.width = (vacant/totalHouses*100) + '%';
-        if (bars[2]) bars[2].style.width = (maint/totalHouses*100) + '%';
+    // Occupancy overview
+    st('occ-occupied', occupied + ' / ' + totalHouses);
+    st('occ-vacant', vacant + ' / ' + totalHouses);
+    st('occ-maintenance', maint + ' / ' + totalHouses);
+    if (totalHouses > 0) {
+        var pct = function(id, v) { var e = document.getElementById(id); if (e) e.style.width = v + '%'; };
+        pct('occ-bar-occupied', Math.round(occupied/totalHouses*100));
+        pct('occ-bar-vacant', Math.round(vacant/totalHouses*100));
+        pct('occ-bar-maintenance', Math.round(maint/totalHouses*100));
     }
-
-    // Update occupancy rate / revenue
-    var occStats = document.querySelectorAll('#page-dashboard .card-body [style*="text-align:center"] [style*="font-family:\\\'Syne\\\'"]');
-    if (occStats[0]) occStats[0].textContent = totalHouses > 0 ? Math.round(occupied/totalHouses*100) + '%' : '0%';
-    if (occStats[1]) occStats[1].textContent = 'RM ' + occupiedRent.toLocaleString();
-    if (occStats[2]) occStats[2].textContent = occupied > 0 ? 'RM ' + Math.round(occupiedRent/occupied).toLocaleString() : 'RM 0';
+    st('occ-rate', totalHouses > 0 ? Math.round(occupied/totalHouses*100) + '%' : '0%');
+    st('occ-revenue', 'RM ' + occupiedRent.toLocaleString());
+    st('occ-avg', occupied > 0 ? 'RM ' + Math.round(occupiedRent/occupied).toLocaleString() : 'RM 0');
 }
 
 // ═══ PAGE NAVIGATION ═══
@@ -479,4 +469,25 @@ document.addEventListener('click', function(e) {
         if (form) form.scrollIntoView({ behavior: 'smooth' });
         showToast('Scroll down to add a new record', 'info');
     }
+});
+
+// ═══ SIDEBAR SETTINGS ═══
+
+document.addEventListener('click', function(e) {
+    var link = e.target.closest('.sidebar-link');
+    if (!link) return;
+    var text = link.textContent.trim();
+    if (text === 'Settings') {
+        e.preventDefault();
+        showToast('Settings panel — coming soon', 'info');
+    }
+});
+
+// ═══ FORGOT PASSWORD ═══
+
+document.addEventListener('click', function(e) {
+    var link = e.target.closest('.login-forgot');
+    if (!link) return;
+    e.preventDefault();
+    showToast('Password reset link sent to admin email (demo)', 'info');
 });
