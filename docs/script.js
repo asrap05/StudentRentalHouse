@@ -487,17 +487,35 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// ═══ SIDEBAR SETTINGS ═══
+// ═══ SETTINGS — CHANGE PASSWORD ═══
 
-document.addEventListener('click', function(e) {
-    var link = e.target.closest('.sidebar-link');
-    if (!link) return;
-    var text = link.textContent.trim();
-    if (text === 'Settings') {
-        e.preventDefault();
-        showToast('Settings panel — coming soon', 'info');
-    }
-});
+function changePassword() {
+    var cur = document.getElementById('settings-current-pwd');
+    var nw = document.getElementById('settings-new-pwd');
+    var cf = document.getElementById('settings-confirm-pwd');
+    var msg = document.getElementById('settings-msg');
+    if (!cur || !nw || !cf) return;
+    if (!cur.value.trim()) { msg.style.display = 'block'; msg.style.background = '#fee2e2'; msg.style.color = '#dc2626'; msg.textContent = '✗ Please enter your current password.'; return; }
+    if (!nw.value.trim() || nw.value.length < 4) { msg.style.display = 'block'; msg.style.background = '#fee2e2'; msg.style.color = '#dc2626'; msg.textContent = '✗ New password must be at least 4 characters.'; return; }
+    if (nw.value !== cf.value) { msg.style.display = 'block'; msg.style.background = '#fee2e2'; msg.style.color = '#dc2626'; msg.textContent = '✗ Passwords do not match.'; return; }
+    msg.style.display = 'block'; msg.style.background = '#dcfce7'; msg.style.color = '#16a34a';
+    msg.textContent = '✓ Password updated successfully!';
+    cur.value = ''; nw.value = ''; cf.value = '';
+    setTimeout(function() { msg.style.display = 'none'; }, 3000);
+}
+
+// ═══ SETTINGS — SAVE PROFILE ═══
+
+function saveProfile() {
+    var name = document.getElementById('settings-display-name');
+    var role = document.getElementById('settings-role-select');
+    var email = document.getElementById('settings-email');
+    if (!name || !name.value.trim()) { showToast('Please enter a display name', 'error'); return; }
+    // Update sidebar user info
+    var avatar = name.value.trim().charAt(0).toUpperCase();
+    updateSidebar(name.value.trim(), role ? role.value : 'Administrator', avatar);
+    showToast('Profile saved!', 'success');
+}
 
 // ═══ FORGOT PASSWORD ═══
 
