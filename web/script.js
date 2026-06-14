@@ -536,5 +536,12 @@ document.addEventListener('click', function(e) {
     showToast('Password reset link sent to admin email (demo)', 'info');
 });
 
-// ═══ INIT: Run stats update immediately ═══
+// ═══ INIT: Run stats + footer updates immediately ═══
 updateDashboardStats();
+// Also update all table footers to match actual row counts
+document.querySelectorAll('table').forEach(function(t) {
+    var rows = t.querySelectorAll('tbody tr');
+    rows.forEach(function(r) { r.style.display = ''; }); // show all rows initially
+    updateFooter(t);
+});
+
