@@ -107,6 +107,12 @@ function switchPageByName(name) {
     document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
     var page = document.getElementById('page-' + name);
     if (page) page.classList.add('active');
+    // Clear any lingering edit state
+    document.querySelectorAll('[data-editing-id]').forEach(function(el) {
+        el.removeAttribute('data-editing-id');
+        var b = el.querySelector('.badge');
+        if (b) { b.textContent = 'Add New'; b.className = 'badge badge-green'; }
+    });
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -243,14 +249,16 @@ document.addEventListener('click', function(e) {
 
         // Scroll to form on current page
         var page = row.closest('[id^="page-"]');
+        var formCard = null;
         if (page) {
-            var formCard = page.querySelector('.card[id$="-form-card"]') || page.querySelector('.card');
+            if (id.charAt(0) === 'H') formCard = document.getElementById('house-form-card');
+            else if (id.charAt(0) === 'T') formCard = document.getElementById('tenant-form-card');
+            else if (id.charAt(0) === 'C') formCard = document.getElementById('complaint-form-card');
             if (formCard) {
                 formCard.scrollIntoView({ behavior: 'smooth' });
                 formCard.setAttribute('data-editing-id', id);
-                // Change form badge
-                var badge = formCard.querySelector('.badge');
-                if (badge) { badge.textContent = 'Editing'; badge.className = 'badge badge-yellow'; }
+                var bdg = formCard.querySelector('.badge');
+                if (bdg) { bdg.textContent = 'Editing'; bdg.className = 'badge badge-yellow'; }
             }
         }
 

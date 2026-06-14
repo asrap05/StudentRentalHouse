@@ -39,7 +39,7 @@
                     <label class="login-label">Username / Staff ID</label>
                     <div class="login-input-wrap">
                         <svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a7 7 0 0113 0"/></svg>
-                        <input id="login-username" class="login-input" type="text" placeholder="e.g. admin or S12345" value="admin"/>
+                        <input id="login-username" class="login-input" type="text" placeholder="e.g. admin or S12345" value=""/>
                     </div>
                 </div>
 
@@ -48,7 +48,7 @@
                     <div style="position:relative;">
                         <div class="login-input-wrap">
                             <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-                            <input id="login-password" class="login-input" type="password" placeholder="Enter your password" value="secret123" style="padding-right:40px;"/>
+                            <input id="login-password" class="login-input" type="password" placeholder="Enter your password" value="" style="padding-right:40px;"/>
                         </div>
                         <span class="pw-toggle" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;">
                             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
