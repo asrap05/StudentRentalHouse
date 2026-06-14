@@ -236,14 +236,104 @@ document.addEventListener('click', function(e) {
     var btn = e.target.closest('button');
     if (!btn) return;
     var text = btn.textContent.trim();
-    if (text === 'Save House' || text === 'Save Tenant' || text === 'Submit Complaint') {
+
+    if (text === 'Save House') {
         e.preventDefault();
-        showToast('Saved successfully! (demo)', 'success');
-    } else if (text === 'Clear Form') {
+        var formCard = btn.closest('.card-body');
+        if (!formCard) return;
+        var inputs = formCard.querySelectorAll('input, select');
+        var location = inputs[2] ? inputs[2].value.trim() : '';
+        var price = inputs[3] ? inputs[3].value.trim() : '';
+        var rooms = inputs[4] ? inputs[4].value.trim() : '';
+        var status = inputs[1] ? inputs[1].value : 'Available';
+        if (!location || !price) { showToast('Please fill Location and Price', 'error'); return; }
+
+        var table = document.querySelector('#page-house table tbody');
+        if (!table) return;
+        var count = table.querySelectorAll('tr').length + 1;
+        var id = 'H-' + String(count).padStart(3, '0');
+        var statusBadge = status === 'Available' ? 'badge-green' : status === 'Occupied' ? 'badge-purple' : 'badge-yellow';
+
+        var row = table.insertRow();
+        row.innerHTML = '<td style="color:var(--gray-400);font-size:12px;">' + count + '</td>' +
+            '<td><span class="id-label">' + id + '</span></td>' +
+            '<td>' + location + '</td>' +
+            '<td style="font-weight:600;color:var(--green-700);">RM ' + price + '</td>' +
+            '<td>' + (rooms || '-') + '</td>' +
+            '<td><span class="badge ' + statusBadge + '">' + status + '</span></td>' +
+            '<td><div class="actions-cell"><button class="topbar-btn btn-warning btn-sm">Edit</button><button class="topbar-btn btn-danger btn-sm">Delete</button></div></td>';
+        updateFooter(row.closest('table'));
+        showToast(id + ' saved!', 'success');
+        inputs[2].value = ''; inputs[3].value = ''; inputs[4].value = '';
+
+    } else if (text === 'Save Tenant') {
         e.preventDefault();
         var card = btn.closest('.card-body');
-        if (card) {
-            card.querySelectorAll('input:not([disabled]), select, textarea').forEach(function(el) {
+        if (!card) return;
+        var inputs = card.querySelectorAll('input, select');
+        var name = inputs[1] ? inputs[1].value.trim() : '';
+        var phone = inputs[2] ? inputs[2].value.trim() : '';
+        var matric = inputs[3] ? inputs[3].value.trim() : '';
+        var house = inputs[4] ? inputs[4].value : '';
+        var date = inputs[5] ? inputs[5].value : '';
+        if (!name || !phone) { showToast('Please fill Name and Phone', 'error'); return; }
+
+        var table = document.querySelector('#page-tenant table tbody');
+        if (!table) return;
+        var count = table.querySelectorAll('tr').length + 1;
+        var id = 'T-' + String(count).padStart(3, '0');
+        var displayDate = date ? new Date(date).toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'}) : '-';
+
+        var row = table.insertRow();
+        row.innerHTML = '<td style="color:var(--gray-400);font-size:12px;">' + count + '</td>' +
+            '<td><span class="id-label">' + id + '</span></td>' +
+            '<td style="font-weight:600;color:var(--gray-800);">' + name + '</td>' +
+            '<td>' + phone + '</td>' +
+            '<td style="font-size:11px;color:var(--gray-400);">' + (matric || '-') + '</td>' +
+            '<td><span class="badge badge-purple">' + (house.split('|')[0] || house || '-') + '</span></td>' +
+            '<td style="font-size:12px;color:var(--gray-500);">' + displayDate + '</td>' +
+            '<td><div class="actions-cell"><button class="topbar-btn btn-warning btn-sm">Edit</button><button class="topbar-btn btn-danger btn-sm">Delete</button></div></td>';
+        updateFooter(row.closest('table'));
+        showToast(id + ' saved!', 'success');
+        inputs[1].value = ''; inputs[2].value = ''; inputs[3].value = '';
+
+    } else if (text === 'Submit Complaint') {
+        e.preventDefault();
+        var card = btn.closest('.card-body');
+        if (!card) return;
+        var inputs = card.querySelectorAll('input, select, textarea');
+        var date = inputs[1] ? inputs[1].value : '';
+        var tenant = inputs[2] ? inputs[2].value : '';
+        var status = inputs[3] ? inputs[3].value : 'Pending';
+        var desc = inputs[4] ? inputs[4].value.trim() : '';
+        if (!desc) { showToast('Please fill the description', 'error'); return; }
+
+        var table = document.querySelector('#page-complaint table tbody');
+        if (!table) return;
+        var count = table.querySelectorAll('tr').length + 1;
+        var id = 'C-' + String(count).padStart(3, '0');
+        var tenantName = tenant.split('|')[1] ? tenant.split('|')[1].trim() : (tenant || '-');
+        var tenantInfo = tenant.split('|')[0] ? tenant.split('|')[0].trim() : '';
+        var displayDate = date ? new Date(date + 'T00:00:00').toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'}) : '-';
+        var statusClass = status === 'Pending' ? 'badge-red' : status === 'In Progress' ? 'badge-yellow' : 'badge-green';
+
+        var row = table.insertRow();
+        row.innerHTML = '<td style="color:var(--gray-400);font-size:12px;">' + count + '</td>' +
+            '<td><span class="id-label">' + id + '</span></td>' +
+            '<td style="max-width:200px;"><div style="font-weight:500;color:var(--gray-800);">' + desc + '</div><div style="font-size:11px;color:var(--gray-400);">New submission</div></td>' +
+            '<td><div style="font-weight:600;font-size:12px;color:var(--purple-700);">' + tenantName + '</div><div style="font-size:10px;color:var(--gray-400);">' + tenantInfo + '</div></td>' +
+            '<td style="font-size:12px;color:var(--gray-500);">' + displayDate + '</td>' +
+            '<td><span class="badge ' + statusClass + '">' + status + '</span></td>' +
+            '<td><div class="actions-cell"><button class="topbar-btn btn-green btn-sm">Resolve</button><button class="topbar-btn btn-warning btn-sm">Edit</button><button class="topbar-btn btn-danger btn-sm">Delete</button></div></td>';
+        updateFooter(row.closest('table'));
+        showToast(id + ' submitted!', 'success');
+        inputs[4].value = '';
+
+    } else if (text === 'Clear Form') {
+        e.preventDefault();
+        var fc = btn.closest('.card-body');
+        if (fc) {
+            fc.querySelectorAll('input:not([disabled]), select, textarea').forEach(function(el) {
                 if (el.tagName === 'SELECT') el.selectedIndex = 0;
                 else el.value = '';
             });
